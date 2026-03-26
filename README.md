@@ -20,7 +20,7 @@ Then:
 
 ## Version History
 
-**Current version**: `v1.2.1` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
+**Current version**: `v1.3.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
 
 To update an existing project to the latest boilerplate version, run `/update-boilerplate` from the Manager agent.
 
@@ -31,6 +31,7 @@ YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
                         ←→ Security (Sonnet)
                         ←→ Designer (Haiku)
                         ←→ Researcher (Sonnet)
+                        ←→ Medic (Opus) [emergency]
                         ←→ Consultant (Opus) [rare]
 ```
 
@@ -42,8 +43,7 @@ YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
 | **Engineer** | Sonnet | Implements features, fixes bugs, commits | Yes |
 | **Security** | Sonnet | Adversarial auditing, finds vulnerabilities | No |
 | **Designer** | Haiku | UI/UX review and design specs | No |
-| **Researcher** | Sonnet | Competitive analysis, market research, feature gaps | No |
-| **Consultant** | Opus | Deep architectural reasoning | No |
+| **Researcher** | Sonnet | Competitive analysis, market research, feature gaps | No || **Medic** | Opus | Emergency incident response, autonomous fix+deploy | Yes || **Consultant** | Opus | Deep architectural reasoning | No |
 
 ### Workflow
 
@@ -104,6 +104,7 @@ Use when you just want the end result, not step-by-step narration of the work.
 | `supply-chain` | Standalone 4-gate supply chain security (submittable to [awesome-copilot](https://github.com/github/awesome-copilot)) |
 | `sbom` | Native SBOM generation via syft/cdxgen + CVE scan via osv-scanner |
 | `product-research` | Research frameworks: ICP analysis, competitive landscape, TAM/SAM/SOM, JTBD, positioning gaps, GTM patterns |
+| `incident-response` | Emergency runbooks: triage, diagnosis, rollback vs patch, incident logs, postmortems |
 
 ## Supply Chain Security
 
@@ -149,6 +150,7 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 | `/learn` | Extract session patterns into `copilot-instructions.md` + Copilot Memory |
 | `/meta` | Answer framework meta questions (agents, tools, skills, workflow) |
 | `/git` | Query GitHub repo state (issues, PRs, commits, workflows, branches) |
+| `/hotfix` | Emergency production incident response via Medic agent |
 
 ## Package Age Policy
 

@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-03-26
+
+### Added
+- **Medic agent** — 7th agent, emergency production incident responder
+  - Autonomous triage, diagnosis, fix, and deployment for SEV 1 incidents
+  - 6-phase protocol with 20-minute time budget (triage → diagnose → fix strategy → execute → deploy → document)
+  - Fast Security Protocol: 6 checks before deploy (not full Security audit for speed)
+  - Writes incident logs to `.agents/incidents/<timestamp>-<slug>.md`
+  - Opens hardening PRs for workarounds
+  - Model: Opus (high-stakes debugging, autonomous decision-making)
+- **incident-response skill** — Emergency runbooks, triage decision trees, incident log templates, postmortem format
+  - 8 runbooks: app crashes, 500 errors, DB failures, pipeline failures, test suite failures, API dependencies, memory leaks, security breaches
+  - Rollback vs patch forward decision framework
+  - Monitoring integration patterns
+- `/hotfix` prompt — Direct Medic invocation for production emergencies
+- Manager Section 10: Medic Emergency Response Rules — when to invoke (SEV 1 only), how to delegate
+
+### Changed
+- Manager model assignments now include: `Medic → Opus (emergency only)`
+- Manager "What You Do NOT Do" updated: Never respond to SEV 1 incidents yourself → delegate to Medic immediately
+- Manager skill suggestion table updated: `"app crashed", "500 error", "deploy failed"` → `incident-response` (via Medic)
+
 ## [1.2.1] - 2026-03-26
 
 ### Fixed
