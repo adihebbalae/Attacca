@@ -74,6 +74,7 @@ Instead of copying full prompts, agents write to `.agents/handoff.md` and you us
 | Prompt | Purpose |
 |--------|----------|
 | `/init-project` | PRD intake and full project scaffolding |
+| `/digest-prd` | Digest large PRDs (500–2000+ lines) into brief + task backlog |
 | `/handoff-to-engineer` | Trigger handoff to Engineer agent |
 | `/handoff-to-security` | Trigger handoff to Security agent |
 | `/handoff-to-designer` | Trigger handoff to Designer agent |

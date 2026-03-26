@@ -20,6 +20,7 @@
     handoff-to-designer.prompt.md   # Quick handoff template → Designer
     handoff-to-consultant.prompt.md # Quick handoff template → Consultant
     init-project.prompt.md          # PRD intake and project scaffolding
+    digest-prd.prompt.md            # Digest large PRDs (500-2000+ lines) into brief + task backlog
     learn.prompt.md                 # Extract session patterns → copilot-instructions.md
   skills/
     code-review/SKILL.md         # On-demand code review checklist

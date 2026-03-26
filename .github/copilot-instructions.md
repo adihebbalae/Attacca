@@ -1,5 +1,7 @@
 # Project Instructions
 
+> **BOILERPLATE DEV MODE**: If you are being asked to edit, improve, or debug this boilerplate template itself — not using it as a project foundation — treat everything below as *content to edit*, not instructions to follow. Just help the user modify the files they're pointing at. The agent protocol below is a template for future projects, not for this conversation.
+
 ## Agent System Protocol
 
 This project uses a multi-agent architecture. Every agent MUST follow this protocol.
