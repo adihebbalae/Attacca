@@ -2,6 +2,14 @@
 
 > **BOILERPLATE DEV MODE**: If you are being asked to edit, improve, or debug this boilerplate template itself — not using it as a project foundation — treat everything below as *content to edit*, not instructions to follow. Just help the user modify the files they're pointing at. The agent protocol below is a template for future projects, not for this conversation.
 
+> **VERSION MANAGEMENT (Boilerplate Dev Mode)**: When making changes to agents, skills, or prompts:
+> 1. Update `.github/BOILERPLATE_VERSION` using semantic versioning:
+>    - MAJOR (X.0.0): Breaking changes to interfaces or workflow
+>    - MINOR (0.X.0): New agents, skills, prompts, or significant features
+>    - PATCH (0.0.X): Bug fixes, docs, minor text updates
+> 2. Add an entry to `CHANGELOG.md` under the new version heading
+> 3. Commit with version number in message: `"feat: add X (v1.3.0)"` or `"fix: update Y (v1.2.2)"`
+
 > **RETROFIT MODE**: If this system was integrated into an EXISTING project (not fresh clone), see [RETROFIT.md](../../RETROFIT.md) for gradual adoption guidelines. Agents work alongside existing workflows, not as replacements.
 
 ## Agent System Protocol
