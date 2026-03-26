@@ -90,6 +90,93 @@ Create or update `.vscode/mcp.json`:
 }
 ```
 
+## Step 4C: Web Search MCP (for Researcher Agent)
+
+Ask the user: **"Do you want to enable web search for the Researcher agent? This gives it powerful internet search beyond just visiting known URLs. Options: (1) Tavily, (2) Brave Search, (3) Perplexity, (4) Skip for now"**
+
+If the user chooses an option, add the corresponding server to `.vscode/mcp.json`:
+
+**Tavily:**
+```json
+{
+  "servers": {
+    "tavily": {
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@latest"],
+      "type": "stdio",
+      "env": {
+        "TAVILY_API_KEY": "${input:tavily-api-key}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "tavily-api-key",
+      "type": "promptString",
+      "description": "Tavily API key (https://tavily.com)",
+      "password": true
+    }
+  ]
+}
+```
+
+**Brave Search:**
+```json
+{
+  "servers": {
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/brave-search-mcp@latest"],
+      "type": "stdio",
+      "env": {
+        "BRAVE_API_KEY": "${input:brave-api-key}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "brave-api-key",
+      "type": "promptString",
+      "description": "Brave Search API key (https://brave.com/search/api/)",
+      "password": true
+    }
+  ]
+}
+```
+
+**Perplexity:**
+```json
+{
+  "servers": {
+    "perplexity": {
+      "command": "npx",
+      "args": ["-y", "perplexity-mcp@latest"],
+      "type": "stdio",
+      "env": {
+        "PERPLEXITY_API_KEY": "${input:perplexity-api-key}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "perplexity-api-key",
+      "type": "promptString",
+      "description": "Perplexity API key (https://perplexity.ai)",
+      "password": true
+    }
+  ]
+}
+```
+
+Merge the chosen server into the existing `.vscode/mcp.json` (alongside context7, not replacing it). If the user skips, the Researcher agent will still work using `browser` to visit known sources directly — just without broad search capability.
+
+Add to `.github/copilot-instructions.md`:
+```markdown
+## Web Search MCP
+- Search MCP: [provider name] — available to Researcher agent for market/competitive research
+- Researcher agent: check `.vscode/mcp.json` for available search tools before defaulting to manual URL visits
+```
+
 Then, based on detected stack, add the relevant library hints to `.github/copilot-instructions.md`:
 
 ```markdown

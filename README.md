@@ -24,17 +24,19 @@ Then:
 YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
                         ←→ Security (Sonnet)
                         ←→ Designer (Haiku)
+                        ←→ Researcher (Sonnet)
                         ←→ Consultant (Opus) [rare]
 ```
 
 ### Agents
 
 | Agent | Model | Role | Writes Code? |
-|-------|-------|------|-------------|
+|-------|-------|------|-----------|
 | **Manager** | Haiku | Plans, delegates, coordinates, pushes | No |
 | **Engineer** | Sonnet | Implements features, fixes bugs, commits | Yes |
 | **Security** | Sonnet | Adversarial auditing, finds vulnerabilities | No |
 | **Designer** | Haiku | UI/UX review and design specs | No |
+| **Researcher** | Sonnet | Competitive analysis, market research, feature gaps | No |
 | **Consultant** | Opus | Deep architectural reasoning | No |
 
 ### Workflow
@@ -95,6 +97,7 @@ Use when you just want the end result, not step-by-step narration of the work.
 | `update-workspace-map` | Auto-regenerate `.agents/workspace-map.md` post-commit |
 | `supply-chain` | Standalone 4-gate supply chain security (submittable to [awesome-copilot](https://github.com/github/awesome-copilot)) |
 | `sbom` | Native SBOM generation via syft/cdxgen + CVE scan via osv-scanner |
+| `product-research` | Research frameworks: ICP analysis, competitive landscape, TAM/SAM/SOM, JTBD, positioning gaps, GTM patterns |
 
 ## Supply Chain Security
 
@@ -136,6 +139,7 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 | `/handoff-to-security` | Trigger handoff to Security agent |
 | `/handoff-to-designer` | Trigger handoff to Designer agent |
 | `/handoff-to-consultant` | Trigger handoff to Consultant agent |
+| `/handoff-to-researcher` | Trigger handoff to Researcher agent |
 | `/learn` | Extract session patterns into `copilot-instructions.md` + Copilot Memory |
 | `/meta` | Answer framework meta questions (agents, tools, skills, workflow) |
 | `/git` | Query GitHub repo state (issues, PRs, commits, workflows, branches) |
