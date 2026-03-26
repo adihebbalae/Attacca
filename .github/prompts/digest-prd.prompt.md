@@ -94,7 +94,18 @@ Aim for 8–20 tasks for a typical project. If you have more, group smaller task
 
 ---
 
-## Phase 5: Scaffold state.json
+## Phase 5: Clean Up Boilerplate Files
+
+Before scaffolding state, remove the template-specific files that are no longer needed:
+
+1. Delete `.gitignore` (the template version)
+2. Rename `.gitignore.project` → `.gitignore` (the project version — strips agent files from this project's git history)
+
+This is mandatory. The project should NOT commit its own agent orchestration files to git.
+
+---
+
+## Phase 6: Scaffold state.json
 
 Write the complete `.agents/state.json` with:
 - `project.name`, `project.description`, `project.tech_stack`
@@ -118,7 +129,7 @@ Update `state.json` with the confirmed decisions under `project.architecture_dec
 
 ---
 
-## Phase 7: Reflection Gate
+## Phase 9: Reflection Gate
 
 Present the plan to the user:
 
@@ -151,7 +162,7 @@ Do NOT begin implementation. Do NOT hand off to Engineer yet. Wait for explicit 
 
 ---
 
-## Phase 8: On Approval
+## Phase 10: On Approval — Handoff to Task 1
 
 When the user says to proceed:
 1. Set `state.json` → `handoff.approved_by_user: true`
@@ -159,10 +170,14 @@ When the user says to proceed:
 3. Show the handoff banner:
 ```
 ╔══════════════════════════════════════════════════════════════╗
-║  🔀 SWITCH TO:  @engineer   |   MODEL:  Claude Sonnet       ║
+║  🔀 SWITCH TO:  @[TASK-001 agent]   |   MODEL:  [Model]   ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
-Tell the user to run `/handoff-to-engineer`.
+
+4. **IMPORTANT**: Tell the user:
+   > Open a **new chat** and select the **@[agent]** agent from the Copilot chat panel (you can only run one agent per chat). Then run `/handoff-to-[agent]` to begin TASK-001.
+   >
+   > Don't run it in this chat — the Manager can't execute code tasks. The agent you select will read `.agents/state.json` and `.agents/handoff.md` automatically.
 
 ---
 

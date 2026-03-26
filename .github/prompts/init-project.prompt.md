@@ -9,7 +9,8 @@ The user is starting a new project. Your job:
 1. Read the PRD or description provided below
 2. Ask clarifying questions until there is ZERO ambiguity — interrogate endlessly
 3. Once clear, scaffold the project:
-   - **Rename `.gitignore.project` → `.gitignore`** (replaces the template .gitignore with the project one)
+   - Delete `.gitignore` (template version)
+   - Rename `.gitignore.project` → `.gitignore` (project version)
    - Fill out `.agents/state.json` with the project plan, phases, and initial tasks
    - Update `.agents/state.md` with project overview
    - Update `.agents/workspace-map.md` with planned structure
