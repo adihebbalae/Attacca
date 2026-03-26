@@ -137,6 +137,8 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 | `/handoff-to-designer` | Trigger handoff to Designer agent |
 | `/handoff-to-consultant` | Trigger handoff to Consultant agent |
 | `/learn` | Extract session patterns into `copilot-instructions.md` + Copilot Memory |
+| `/meta` | Answer framework meta questions (agents, tools, skills, workflow) |
+| `/git` | Query GitHub repo state (issues, PRs, commits, workflows, branches) |
 
 ## Package Age Policy
 
