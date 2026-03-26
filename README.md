@@ -127,6 +127,7 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 | Prompt | Purpose |
 |--------|----------|
 | `/init-project` | PRD intake, full scaffolding, GitHub Issues backlog, Context7 MCP config |
+| `/mvp` | Max velocity mode: aggressive parallelization, deferred gates, scope razor, parallel Engineer sessions |
 | `/digest-prd` | Digest large PRDs (500–2000+ lines) into brief + task backlog |
 | `/review-dependencies` | Pre-handoff dependency vetting (supply chain security) |
 | `/remember-handoff` | Write handoff to Copilot Memory — next agent reads it automatically |
