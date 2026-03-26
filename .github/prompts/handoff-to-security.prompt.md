@@ -1,6 +1,15 @@
 ---
-description: "Quick handoff to the Security agent. Reads the current handoff from .agents/handoff.md and begins security audit."
+description: "Hand off current task to the Security agent for adversarial audit."
 agent: "security"
+argument-hint: "TASK-ID and brief description — e.g. TASK-003: audit auth flow"
 ---
 
-Read `.agents/handoff.md` for your security review task. Read `.agents/state.json` to understand what changed. Perform a full adversarial security audit following your protocol. Write your report back to `.agents/handoff.md`.
+Task: $ARGUMENTS
+
+First, read `.agents/handoff.md` and extract the Task ID and title from the `# Handoff:` heading. Output this as your very first line:
+
+```
+💬 Rename this chat: "[TASK-ID]: [task title] → @security"
+```
+
+Then proceed: read `.agents/state.json` to understand what changed, perform a full adversarial security audit following your protocol, and write your report back to `.agents/handoff.md`.

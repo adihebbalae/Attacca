@@ -51,7 +51,7 @@ When delegating work to another agent:
 ║  🔀 SWITCH TO:  @[agent]   |   MODEL:  [Model]             ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
-   Then: **"Run `/handoff-to-[agent]` or copy `.agents/handoff.md` and send it to @[agent] using [Model]"**
+   Then: **"Run `/handoff-to-[agent] [TASK-ID]: [task title]` — the task name keeps parallel chats distinct."**
 
 ### 4. State Management
 - Keep `.agents/state.json` as the single source of truth
