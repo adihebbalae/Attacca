@@ -10,7 +10,7 @@
 > 2. Add an entry to `CHANGELOG.md` under the new version heading
 > 3. Commit with version number in message: `"feat: add X (v1.3.0)"` or `"fix: update Y (v1.2.2)"`
 
-> **RETROFIT MODE**: If this system was integrated into an EXISTING project (not fresh clone), see [RETROFIT.md](../../RETROFIT.md) for gradual adoption guidelines. Agents work alongside existing workflows, not as replacements.
+> **RETROFIT MODE**: If this system was integrated into an EXISTING project (not fresh clone), see [RETROFIT.md](../RETROFIT.md) for gradual adoption guidelines. Agents work alongside existing workflows, not as replacements.
 
 ## Agent System Protocol
 
@@ -33,9 +33,10 @@ This project uses a multi-agent architecture. Every agent MUST follow this proto
 
 ### Handoff Protocol
 When work needs to transfer between agents:
-1. The sending agent writes the handoff prompt to `.agents/handoff.md`
-2. The sending agent updates `state.json` → `handoff` field with target agent, model, and context
-3. The sending agent shows a prominent banner to the user:
+
+**Autonomous mode (v2.0, VS Code Feb 2026+)**: Manager uses `runSubagent` to spawn worker agents directly. No manual handoff needed after PRD approval. Manager controls the full loop until completion or a break condition is hit (3 Engineer failures or CRITICAL security finding).
+
+**Manual mode (backward compatible)**: The sending agent writes the handoff prompt to `.agents/handoff.md`, updates `state.json` → `handoff` field, and shows a prominent banner to the user:
    ```
    ╔══════════════════════════════════════════════════════════════╗
    ║  🔀 SWITCH TO:  @[agent]   |   MODEL:  [Model]             ║
@@ -48,7 +49,8 @@ When work needs to transfer between agents:
 - `.agents/state.md` — Human-readable dashboard
 - `.agents/workspace-map.md` — File/directory reference
 - `.agents/handoff.md` — Current handoff prompt
-- **No other state/summary files.** If it's not in these four files, it doesn't exist.
+- `.agents/MODULES.md` — Module registry for complex projects (3+ modules); auto-created by `/init-project`
+- **No other state/summary files.** If it's not in these five files, it doesn't exist.
 
 ## Code Standards
 - Write clean, readable code with meaningful names

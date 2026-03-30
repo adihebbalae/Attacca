@@ -1,6 +1,8 @@
 ---
 description: "Emergency production incident responder. Use when: app crashes, 500 errors, critical user flows broken, build/deploy failures, test suite failures. Autonomous triage, diagnosis, and fix deployment with fast security protocol. The on-call engineer that never sleeps."
 tools: [codebase, editFiles, terminal, search, problems, runCommands]
+model: Claude Opus 4.5 (copilot)
+user-invocable: false
 ---
 
 # Medic Agent

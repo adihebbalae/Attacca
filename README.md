@@ -1,6 +1,8 @@
 # Agent Boilerplate
 
-A multi-agent orchestration framework for GitHub Copilot using Claude models — recreating Claude Code's agentic workflow patterns in VS Code.
+**PRD → Project.** Paste a product requirements doc, answer a few questions, and a multi-agent system plans, builds, tests, and commits the code — while you review.
+
+Orchestration layer for GitHub Copilot + Claude Code: Manager (Haiku) coordinates, Engineer (Sonnet) implements, Security audits before every push. Works in VS Code and Claude Code CLI, both sharing the same state files.
 
 ## Quick Start
 
@@ -13,16 +15,71 @@ cd my-project-name
 Then:
 1. Open the folder in VS Code with GitHub Copilot + Claude models enabled
 2. Select the **Manager** agent in the Copilot chat panel
-3. For a standard PRD: use `/init-project` and paste your PRD
-4. For a large PRD (500+ lines): use `/digest-prd` instead — compresses it into a task backlog first
+3. For any project: use `/init-project` with your PRD
+4. Manager runs: PRD → Research → Setup Questions → Clarifications → Scaffold
+   - **Research Phase**: Researcher gathers competitive/market/tech intelligence
+   - **Setup Questions**: Tools & budget adapted automatically
+   - **Clarifications**: PRD edge cases resolved
+   - **Scaffold**: All decisions grounded in research findings
+
+Paste your PRD. Research runs automatically. That's it — **PRD → Research → Project.**
 
 > **Note**: `/init-project` and `/digest-prd` both handle the `.gitignore.project` rename automatically.
 
+## Adaptive Workflow (Tools & Budget)
+
+When you run `/init-project`, Manager asks two setup questions to adapt the workflow:
+
+| Question | Options | Impact |
+|----------|---------|--------|
+| **Do you have Claude Code CLI?** | Yes / No | No CLI? Everything routes through GitHub Copilot (160k context). Have CLI? Unlock Complex Project Mode for 20+ file projects. |
+| **What's your budget?** | Free tier / Paid / TBD | Free? Manager adds a research task to find free deployment options. Paid? Use production-grade tools from day one. |
+
+**Why?** This ensures the boilerplate works for everyone: Copilot-only users, budget-conscious teams, and power users with CLI access. Your answers are saved in `.agents/state.json` and used by Manager for routing decisions.
+
+**Want to change your answers later?** Run `/setup-budget` anytime.
+
 ## Version History
 
-**Current version**: `v1.3.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
+**Current version**: `v2.1.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
 
 To update an existing project to the latest boilerplate version, run `/update-boilerplate` from the Manager agent.
+
+## Dual-Mode Workflow
+
+This boilerplate works in two modes. Both use the same agent definitions.
+
+### Mode 1: VS Code (GitHub Copilot)
+
+Agents live in `.github/agents/*.agent.md`. Open the Copilot chat panel, select **Manager**, and start.
+
+- **Autonomous (VS Code Feb 2026+)**: Manager spawns subagents automatically after you approve the plan. No copy-pasting prompts. Requires `github.copilot.chat.claudeAgent.enabled: true` in VS Code settings.
+- **Manual (any VS Code version)**: Manager writes handoffs to `.agents/handoff.md`. You copy them to the target agent using `/handoff-to-[agent]` prompts.
+
+### Mode 2: Claude Code CLI
+
+Agents live in `.claude/agents/*.md`. Install Claude Code, run `claude` from the project root. Claude reads `CLAUDE.md` as a bootstrap and uses `.claude/agents/` for subagent definitions.
+
+```bash
+# Install
+npm install -g @anthropic-ai/claude-code
+
+# Start from project root
+claude
+```
+
+Hooks in `.claude/settings.json` automatically run lint after every file edit — no manual gate-running needed.
+
+### Switching Modes
+
+Both modes share the same state files (`.agents/state.json`, `.agents/state.md`). You can switch mid-project:
+
+| What you need | Use |
+|---------------|-----|
+| VS Code native IDE experience, Copilot billing | Mode 1 |
+| Terminal-first, long-running autonomous tasks, Claude billing | Mode 2 |
+| Maximum autonomy (1M context, hooks, extended thinking) | Mode 2 |
+| Tight VS Code integration (extensions, LSP, editor tools) | Mode 1 |
 
 ## Architecture
 
@@ -47,6 +104,12 @@ YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
 
 ### Workflow
 
+**Autonomous mode (v2.0 default — VS Code Feb 2026+ or Claude Code CLI)**:
+1. **You → Manager**: Paste PRD, answer clarifying questions, approve the plan
+2. **Manager**: Spawns Engineer, Security, and other agents automatically as subagents
+3. **Manager**: Reports final result when complete or surfaces blockers to you
+
+**Manual mode (backward compatible — any VS Code version)**:
 1. **You → Manager**: Describe what you want
 2. **Manager**: Plans the work, writes a handoff to `.agents/handoff.md`
 3. **Manager → You**: "Copy `.agents/handoff.md` to @engineer using Sonnet"
@@ -55,6 +118,22 @@ YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
 6. **Before push**: Manager generates security review → You send to Security agent
 7. **Security**: Reports findings → Engineer fixes → repeat until clean
 8. **Manager**: Pushes to repo
+
+### Complex Project Mode
+
+**Requirements**: 3+ modules in your PRD AND Claude Code CLI available.
+
+**What it does:**
+- **Module registry** — tracks status, owner, and dependencies for every functional area across sessions
+- **Context routing** — routes ≤3-file tasks to Copilot (160k context), 10+-file or multi-module tasks to Claude Code CLI (1M context) automatically
+- **Dependency ordering** — identifies which modules can be built in parallel vs must be sequential
+- **Cross-session continuity** — MODULES.md persists so you never lose track across a 3-month build
+
+```powershell
+# After /init-project generates MODULES.md:
+/list-modules    # Status table: done / in-progress / blocked / design
+/show-graph      # ASCII dependency graph + critical path + parallel build plan
+```
 
 ### Handoff Flow (solving the copy-paste problem)
 
@@ -136,6 +215,8 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 
 | Prompt | Purpose |
 |--------|----------|
+| `/quickstart` | Interactive onboarding for first-time users (start here!) |
+| `/prd-builder` | Build a comprehensive PRD from scratch using Socratic questioning |
 | `/init-project` | PRD intake, full scaffolding, GitHub Issues backlog, Context7 MCP config |
 | `/mvp` | Max velocity mode: aggressive parallelization, deferred gates, scope razor, parallel Engineer sessions |
 | `/digest-prd` | Digest large PRDs (500–2000+ lines) into brief + task backlog |
@@ -151,6 +232,9 @@ See [Security Agent](Security.agent.md) for full dependency review process.
 | `/meta` | Answer framework meta questions (agents, tools, skills, workflow) |
 | `/git` | Query GitHub repo state (issues, PRs, commits, workflows, branches) |
 | `/hotfix` | Emergency production incident response via Medic agent |
+| `/setup-budget` | Reconfigure your tools and budget (run after `/init-project` if you want to change settings) |
+| `/list-modules` | Status table of all project modules: complete/in-progress/blocked (complex projects) |
+| `/show-graph` | ASCII dependency graph with build order and critical path (complex projects) |
 
 ## Package Age Policy
 

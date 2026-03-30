@@ -3,16 +3,13 @@
 > Auto-updated by agents. Human-readable view of `.agents/state.json`.
 
 ## Status
-- **Project**: _Not initialized_
-- **Phase**: 0 — Not Started
-- **Current Task**: None
-- **Assigned To**: —
-- **Blocked On**: —
+- **Project**: [To be filled by downstream user]
+- **Phase**: [To be filled by downstream user]
+- **Current Task**: [To be filled by downstream user]
+- **Blocked On**: [To be filled by downstream user]
 
-## Recent Activity
-_No activity yet. Start by giving the Manager agent your PRD._
+## Additional Info
 
-## Security
-- **Last Scan**: Never
-- **Open Findings**: 0
-- **Cleared for Push**: No
+**See `.agents/state.json` for structured state data.**
+
+For framework/boilerplate development notes, see `.agents/_dev/state-meta.md` (gitignored).

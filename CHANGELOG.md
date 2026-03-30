@@ -5,7 +5,124 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.0] - 2026-03-26
+## [2.3.0] - 2026-03-29
+
+### Added
+- **🚨 ANTI-HALLUCINATION PROTOCOLS** — Mandatory verification standards for Researcher and Meta-Researcher agents. Prevents false research findings from causing downstream business failures. Includes: (1) Never claim something doesn't exist without `[GAP]` qualifier, (2) Distinguish training knowledge from live verification, (3) Explicit confidence levels `[CONFIRMED]`/`[LIKELY]`/`[INFERRED]`/`[GAP]`, (4) Source everything with date, (5) 6-point verification checklist before report submission, (6) "When in doubt, say so" principle. **Critical fix**: Original researcher hallucinated that Meta Tribe V2 doesn't exist; it does (ai.meta.com, Hugging Face model, public demo).
+- **`/btw` prompt** — Context-free question or steering command. Ask quick questions or provide mid-task steering without derailing the agent. Agent answers concisely (1-3 sentences) and resumes previous task automatically. Reduces friction for "wait, what does X mean?" interruptions during implementation.
+- **Meta-Researcher agent** — Internal research arm for framework development. Writes competitive analyses, roadmap research, and technical feasibility studies to `.agents/_dev/` (gitignored). Used by Meta-Manager for architectural decisions. Distinct from regular Researcher (which helps users build products). Includes same anti-hallucination protocols.
+- **`implementable-features-copilot-code-2026.md`** — Analysis document extracting 7 next-level optimizations from copilot-code research: context budget tracking, auto-enable vibe mode, PostToolUse hooks, IDE-specific guides, auto-generate Claude agents, randomized security audits, context pressure detection. Prioritized for v2.3-v2.4 roadmap.
+- **`correction-tribe-v2.md`** — Root cause analysis and corrected findings for Meta Tribe V2 hallucination. Documents what went wrong, correct information (Tribe V2 exists with Hugging Face API), and revised advertising agent recommendation.
+
+### Fixed
+- **🚨 CRITICAL: Researcher hallucination prevention** — Added 7 mandatory anti-hallucination rules to prevent false negatives. Original research falsely claimed "Meta Tribe V2 doesn't exist" when it does (public blog, demo, Hugging Face model). This would have caused incorrect architectural decisions for advertising agent. Now requires explicit confidence tagging, source citations, and distinction between training knowledge vs. live verification.
+- **Researcher agent web access** — Corrected tools from `[browser, search]` (non-existent in VS Code) to `[fetch_webpage]` (actual available tool). Added prominent documentation explaining web access limitations when spawned as subagent vs. separate chat with web MCP server. Previous researcher invocations synthesized from training knowledge instead of live web research.
+
+### Changed
+- **v2.1 roadmap status** — Marked Feature 1 (Complex Project Mode) as ✅ SHIPPED, Feature 2 (Deployer agent) as ⏸️ PINNED FOR FUTURE. Deployer research complete and technically feasible, but deferred to v2.4+ in favor of v2.3 optimizations (context budget tracking, PostToolUse hooks).
+- **Researcher agent instructions** — Added "Web Access Limitations" section explaining when to recommend separate chat vs. subagent mode. Researcher now explicitly tells Manager when research requires full web access. Added mandatory 6-point verification checklist before submitting reports.
+- **Meta-Researcher agent instructions** — Same anti-hallucination protocols as Researcher. Framework architectural decisions must be evidence-based.
+
+### Why
+**This release prevents research hallucinations** — the single most dangerous failure mode in agent systems. False research findings cause cascading business failures (wrong tech stack, missed opportunities, incorrect market sizing). The original researcher hallucinated that Meta Tribe V2 doesn't exist, which would have excluded it from advertising agent consideration. With mandatory anti-hallucination protocols, every claim now requires confidence tagging, source citations, and explicit "I don't know" when verification is impossible. The `/btw` command reduces conversational overhead. Meta-Researcher enables evidence-based framework development. The copilot-code analysis provides a clear roadmap for v2.3-v2.4.
+
+## [2.2.1] - 2026-03-29
+
+### Added
+- **`/prd-builder` prompt** — Socratic method PRD construction tool. Interrogates user endlessly (problem, solution, feasibility, GTM) until zero ambiguity, then generates a production-grade PRD ready for `/init-project`. Eliminates "I thought we were building X but you meant Y" disasters. Particularly useful for first-time users who don't know how to structure a PRD.
+- **`/quickstart` prompt** — Interactive onboarding walkthrough for first-time users. Explains the repo, asks about tools/experience level, provides tailored guides (beginner vs power user), and nudges user to start their first project with `/prd-builder` or `/init-project`. Reduces time-to-first-commit from hours to minutes.
+- **README prompts table** — Added `/prd-builder` and `/quickstart` to main documentation. Prompts now lead with onboarding tools to reduce first-time friction.
+
+### Changed
+- README prompts table — now leads with `/quickstart` (start here!) and `/prd-builder` before `/init-project`
+
+### Why
+New users cloning the template faced two blockers: (1) "What is this system?" (no clear entry point), and (2) "How do I write a PRD?" (assumed knowledge). `/quickstart` onboards in <10 minutes with tailored guides based on experience level. `/prd-builder` constructs PRDs from scratch using Socratic questioning — no prior knowledge required. Together, these tools reduce onboarding friction from "intimidating" to "guided."
+
+## [2.2.0] - 2026-03-29
+
+### Added
+- **Research-First Phase** — `/init-project` now invokes Researcher before scaffolding. Manager identifies research opportunities in the PRD (new market, competitive analysis, tech validation, free tools), spawns Researcher subagent autonomously, and shows findings to user before asking setup questions or clarifications.
+- **Research Attribution** — All project scaffolding references `.agents/research/[slug].md`. Future sessions know decisions are grounded in market evidence, not hunches. Added to `.agents/state.json` → `research_source` and `research_findings_incorporated`.
+- **7-Phase Init Workflow** — `/init-project` execution now follows: (1) PRD intake + research scoping, (2) invoke Researcher, (3) show findings, (4) team setup questionnaire, (5) PRD clarifications, (6) present plan, (7) scaffold with research incorporated
+- **Phase 7 Sub-Steps** — GitHub Issues, MCP config, web search MCP, MODULES.md, and post-scaffolding messaging as structured sub-steps of the main scaffolding phase
+
+### Changed
+- `/init-project` prompt — completely restructured into 7 phases with explicit research intake phase
+- Manager Section 1 (Planning & Scoping) — "Research first" now refers to invoking Researcher subagent on PRD intake
+- README Quick Start — now shows "PRD → Research → Project" instead of "PRD → Project"
+- README Adaptive Workflow — updated to explain research findings impact on tech stack recommendations
+
+### Why
+Developers often scaffold projects based on hunches — "React is fast", "PostgreSQL scales", "we should offer free tier." This release adds Researcher as a mandatory gate: every PRD triggers research first, findings are shown to user, and all tech recommendations are evidenced. Over 3-6 month timelines, this prevents expensive pivot-backs mid-project.
+
+## [2.1.1] - 2026-03-29
+
+### Added
+- **Team Setup Questionnaire** — `/init-project` now asks two adaptive questions at the start:
+  - "Do you have Claude Code CLI available?" → determines if Complex Project Mode routing is active
+  - "What's your project budget?" → triggers free-tier research task if needed
+- **Adaptive workflow** — workflow adapts based on answers: Copilot-only users get pure GitHub Copilot routing (no context overflow handling), free-budget teams get research tasks for free services, paid teams get production defaults
+- **`context.tools` and `context.budget`** — new fields in `.agents/state.json` store user's setup; used by Manager for routing decisions
+- **`/setup-budget` prompt** — reconfigure tools and budget settings after `/init-project` without re-scaffolding
+- **Manager routing logic (Section 12)** — now checks `context.tools.claude_code_cli` before offering Claude Code CLI routing; if unavailable, suggests installing or using `/mvp` mode for large projects
+
+### Changed
+- `/init-project` — now includes Team Setup Questionnaire before PRD scaffolding
+- Manager Section 12 — prerequisites now include check for Claude Code CLI availability
+- README — added "Adaptive Workflow" section explaining tools & budget impact
+- README Quick Start — now mentions setup questionnaire
+
+### Why
+Users have different setups: GitHub Copilot only, Copilot + Claude Code CLI, free vs paid budgets. The boilerplate now adapts automatically instead of assuming everyone has the same tools. Works for solo devs with GitHub Copilot, teams on a budget using free services, and power users with full Claude Code access.
+
+## [2.1.0] - 2026-03-29
+
+### Added
+- **Complex Project Mode** — For solo projects with 3+ modules: auto-generated `MODULES.md` registry tracks module dependencies, statuses, and ownership across long development timelines
+- **Context Budget Routing** — Manager automatically routes tasks to Copilot subagent (≤3 files) or Claude Code CLI (10+ files / 3+ modules); eliminates 160k context overflow on large codebases
+- **Module Status Checkpoint** — After every Engineer commit, Manager updates MODULES.md, detects newly unblocked modules, and surfaces the next recommended task
+- **`/init-project` complex mode** — When PRD contains 3+ functional areas, generates MODULES.md with full dependency ordering and parallel build plan before any code is written
+- **`/list-modules` prompt** — Status table (✅ complete | 🔄 in-progress | ⏸ blocked | ⏳ design) with unblocked-next recommendations
+- **`/show-graph` prompt** — ASCII dependency graph with build order and critical path; shows which modules can be built in parallel
+- **Manager Section 12** — Full routing rules, MODULES.md maintenance contract, and module status checkpoint protocol
+- **Engineer Section 6** — Module status update protocol added to implementation checklist
+- **`.agents/MODULES.md`** — Template file added to boilerplate
+
+### Changed
+- Manager Section 7 (Project Scaffolding) — now generates MODULES.md for PRDs with 3+ modules
+- Engineer Session End Checklist — step 5 added: update MODULES.md for all modules touched
+- `copilot-instructions.md` — MODULES.md added to the five canonical state files
+
+### Architecture
+Adds a **module registry layer** between PRD intake and task execution. Manager reads MODULES.md before every routing decision, preventing 160k context overflow by automatically delegating large tasks to Claude Code CLI's 1M context window. Designed for solo projects with 3–6 month timelines.
+
+## [2.0.0] - 2026-01-01
+
+### Added
+- **Native subagent orchestration (VS Code Feb 2026)** — Manager can autonomously spawn worker agents using `runSubagent`, eliminating manual copy-paste handoffs after PRD approval
+- **Enforced model routing** — all 7 agents now declare `model:` in frontmatter (VS Code enforces this when switching/spawning agents); no longer advisory-only
+- **Manager handoff buttons** — native `handoffs:` frontmatter creates clickable UI buttons for → Engineer, → Security Audit, → Designer
+- **Anti-bias Security spawning** — Manager Section 11 enforces that Security subagent prompts never include implementation context; context isolation is the adversarial advantage
+- **Break conditions** — Manager halts autonomously: 3 consecutive Engineer failures trigger user escalation; any CRITICAL security finding halts the full task queue
+- **Engineer retry protocol (Section 5)** — tracks attempt count in `context.engineer_notes`, escalates via `context.blocked_on` after 3 failures; operates without user questions in subagent mode
+- **Security compact output format** — when invoked as subagent, Security returns concise `CRITICAL: n | HIGH: n | VERDICT: PASS/FAIL` block to keep Manager context lean
+- **`CLAUDE.md`** — root-level Claude Code CLI bootstrap; concise Manager summary with startup protocol, core rules, and state file references
+- **`.claude/agents/` directory** — 6 Claude-format agent files (`engineer.md`, `security.md`, `designer.md`, `researcher.md`, `consultant.md`, `medic.md`) for native Claude Code CLI subagent use
+- **`.claude/settings.json`** — PostToolUse hooks: runs `npm run lint` or `flake8` automatically after every file Write/Edit; deterministic guarantee vs advisory instructions
+- **Dual-mode workflow** — same agent definitions work in both VS Code (`.github/agents/*.agent.md`) and Claude Code CLI (`.claude/agents/*.md`)
+- **Manager Session End Checklist** — new section; ensures state.json and state.md are always updated before session close
+- **Manager `agents:` frontmatter** — declares allowed subagents for VS Code subagent orchestration feature
+
+### Changed
+- Manager, Engineer, Security, Designer, Researcher, Consultant, Medic — all frontmatter updated with `model:` field (VS Code-enforced routing)
+- Manager Session Start Checklist — now also checks `context.blocked_on` and `handoff.approved_by_user` before responding
+- README — added Dual-Mode Workflow section documenting VS Code vs Claude Code CLI usage
+
+### Architecture
+This release introduces the shift from **manual handoff mode** (user copies prompts between agent chat windows) to **autonomous subagent mode** (Manager spawns workers automatically). Manual mode remains fully supported for backward compatibility.
+
+
 
 ### Added
 - **Medic agent** — 7th agent, emergency production incident responder
