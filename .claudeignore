@@ -1,0 +1,82 @@
+# .claudeignore — tells Claude Code CLI which files/dirs to skip
+# Works like .gitignore. Dramatically reduces token usage on every prompt.
+# Reference: reddit.com/r/ClaudeAI workaround B2
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+.env.*/
+
+# Build output
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Lock files (large, never need to read)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+poetry.lock
+Gemfile.lock
+composer.lock
+cargo.lock
+
+# Generated / minified assets
+*.min.js
+*.min.css
+*.map
+*.bundle.js
+*.chunk.js
+
+# Coverage / test artifacts
+coverage/
+.nyc_output/
+htmlcov/
+.pytest_cache/
+.rspec/
+
+# Logs & temp files
+*.log
+*.tmp
+*.cache
+.cache/
+tmp/
+temp/
+
+# Binary / media (never useful to read)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.ico
+*.webp
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.mp4
+*.mp3
+*.pdf
+*.zip
+*.tar.gz
+*.gz
+
+# System
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+*.suo
+*.user

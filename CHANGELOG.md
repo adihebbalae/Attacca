@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] - 2026-04-05
+
+### Added
+- **`.claudeignore`** — Stops Claude Code CLI from reading `node_modules/`, `dist/`, lock files, build output, binary assets, and other folders that waste tokens without adding value. Savings compound on every prompt.
+- **`.claude/hooks/read-once.sh`** — Per-session cache that blocks Claude from re-reading files it already loaded. Benchmarked at ~38K tokens saved per session (~40-90% reduction in Read tool token usage).
+
+### Changed
+- **`.claude/settings.json`** — Now defaults to `sonnet` model (~60% cheaper than Opus 4.6), caps hidden thinking tokens at 10K (was 32K default, ~70% saving), sets context autocompact at 50% instead of 95% (healthier sessions), routes subagents to `haiku` (~80% cheaper). Added `PreToolUse` hook wiring for `read-once.sh`. Combined effect: 60-80% reduction in token consumption per session.
+- **`CLAUDE.md`** — Reduced from ~100 lines to 36 lines. CLAUDE.md loads on every single message; the full protocol is now loaded on-demand from `.github/agents/manager.agent.md`. Estimated saving: ~1,000 tokens per message at startup.
+
+### Why
+All four changes come directly from the Claude Code CLI community's most-measured optimizations (B1-B4 from the ongoing usage limits megathread). The settings.json block alone is reported to cut consumption 60-80%. The read-once hook is the single highest-leverage hook available — one session in the benchmark saved 38K tokens out of 94K total reads. Lean CLAUDE.md is the easiest win: the file loads on every message, so every token you remove is saved repeatedly throughout the session.
+
+## [2.7.1] - 2026-04-05
+
+### Added
+- **Per-task usage tracking in `auto-run.ps1`** — `--output-format json` flag on the Claude CLI `-p` call (format flag only, zero extra tokens). `Get-UsageFromJsonOutput` parses `cost_usd`, `input_tokens`, `output_tokens`, `duration_ms` fields. `Write-InlineUsage` prints usage after each task. `Show-UsageTable` prints a final breakdown with totals. Falls back to wall-clock time if token data is absent.
+
 ## [2.7.0] - 2026-04-05
 
 ### Added
