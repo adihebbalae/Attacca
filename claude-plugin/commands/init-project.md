@@ -117,7 +117,7 @@ Files created:
 - .agents/handoff.md
 
 **Next**: I'll write the handoff for TASK-001 and you can run:
-  /agent-boilerplate:handoff-to-engineer TASK-001
+  /attacca:handoff-to-engineer TASK-001
 
 Want me to do that now?
 ```

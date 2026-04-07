@@ -231,7 +231,7 @@ export async function runScaffold(): Promise<void> {
       await writeWorkspaceFile(workspaceRoot, 'attacca.config.json', JSON.stringify(config, null, 2) + '\n');
 
       // BOILERPLATE_VERSION file
-      await writeWorkspaceFile(workspaceRoot, '.github/BOILERPLATE_VERSION', `v3.0.0\n# Template: adihebbalae/copilot-code\n# Do not edit manually — updated by Attacca extension\n`);
+      await writeWorkspaceFile(workspaceRoot, '.github/BOILERPLATE_VERSION', `v3.0.0\n# Template: adihebbalae/Attacca\n# Do not edit manually — updated by Attacca extension\n`);
 
       progress.report({ message: 'Done!', increment: 10 });
 

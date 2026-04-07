@@ -1,10 +1,10 @@
 {
-  "name": "create-agent-boilerplate",
+  "name": "create-attacca",
   "version": "3.0.0",
-  "description": "Scaffold a multi-agent AI coding boilerplate for any IDE — Copilot, Cursor, Cline, Windsurf, Claude Code, Antigravity, and more.",
+  "description": "Scaffold a multi-agent AI coding workflow for any IDE — Copilot, Cursor, Cline, Windsurf, Claude Code, Antigravity, and more. Powered by Attacca.",
   "type": "module",
   "bin": {
-    "create-agent-boilerplate": "./bin/index.js"
+    "create-attacca": "./bin/index.js"
   },
   "keywords": [
     "ai-agents",
@@ -19,10 +19,10 @@
     "cli"
   ],
   "author": "adihebbalae",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adihebbalae/copilot-code"
+    "url": "https://github.com/adihebbalae/Attacca"
   },
   "engines": {
     "node": ">=18.0.0"

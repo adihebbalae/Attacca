@@ -358,7 +358,7 @@ Read-only adversarial auditor. Finds vulnerabilities, never modifies code.
 function codexFiles({ fullAgents, llmMode }) {
   const files = {};
 
-  files['AGENTS.md'] = `# Agent Boilerplate — Manager (Codex CLI)
+  files['AGENTS.md'] = `# Attacca — Manager (Codex CLI)
 
 You are the **Manager** — project orchestrator. Plan, delegate, coordinate. Never write application code.
 

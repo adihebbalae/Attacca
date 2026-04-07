@@ -140,8 +140,8 @@ async function main() {
   }
 
   console.log('╔══════════════════════════════════════════════════════════════╗');
-  console.log('║   create-agent-boilerplate                                  ║');
-  console.log('║   Multi-agent AI coding scaffold for any IDE                ║');
+  console.log('║   create-attacca                                            ║');
+  console.log('║   Multi-agent AI coding scaffold — proceed without pause    ║');
   console.log('╚══════════════════════════════════════════════════════════════╝');
 
   // Target directory

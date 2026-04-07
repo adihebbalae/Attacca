@@ -151,7 +151,7 @@ Thumbs.db
 
   files['README.md'] = `# Project Name
 
-> Scaffolded with [create-agent-boilerplate](https://github.com/adihebbalae/copilot-code)
+> Scaffolded with [Attacca](https://github.com/adihebbalae/Attacca)
 
 ## Quick Start
 

@@ -6,13 +6,13 @@
   "publisher": "adihebbalae",
   "repository": {
     "type": "git",
-    "url": "https://github.com/adihebbalae/copilot-code"
+    "url": "https://github.com/adihebbalae/Attacca"
   },
-  "homepage": "https://github.com/adihebbalae/copilot-code#readme",
+  "homepage": "https://github.com/adihebbalae/Attacca#readme",
   "bugs": {
-    "url": "https://github.com/adihebbalae/copilot-code/issues"
+    "url": "https://github.com/adihebbalae/Attacca/issues"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "icon": "media/icon.png",
   "engines": {
     "vscode": "^1.87.0"

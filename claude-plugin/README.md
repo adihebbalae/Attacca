@@ -1,6 +1,6 @@
-# Agent Boilerplate — Claude Code Plugin
+# Attacca — Claude Code Plugin
 
-Multi-agent development workflow for any project. Manager coordinates, Engineer builds, Security audits. Install once and it works across all your Claude Code projects.
+Multi-agent AI coding orchestrator. Manager coordinates, Engineer builds, Security audits. Install once and it works across all your Claude Code projects.
 
 ## Included
 
@@ -20,12 +20,12 @@ Multi-agent development workflow for any project. Manager coordinates, Engineer 
 - `security-audit` — OWASP Top 10 checklist
 
 **Commands** (user-invoked):
-- `/agent-boilerplate:init-project` — set up `.agents/` state for a new project
-- `/agent-boilerplate:handoff-to-engineer TASK-001` — delegate to Engineer
-- `/agent-boilerplate:handoff-to-security TASK-001` — trigger security audit
-- `/agent-boilerplate:handoff-to-designer TASK-001` — request design review
-- `/agent-boilerplate:handoff-to-researcher TASK-001` — start market research
-- `/agent-boilerplate:handoff-to-consultant TASK-001` — architectural decisions
+- `/attacca:init-project` — set up `.agents/` state for a new project
+- `/attacca:handoff-to-engineer TASK-001` — delegate to Engineer
+- `/attacca:handoff-to-security TASK-001` — trigger security audit
+- `/attacca:handoff-to-designer TASK-001` — request design review
+- `/attacca:handoff-to-researcher TASK-001` — start market research
+- `/attacca:handoff-to-consultant TASK-001` — architectural decisions
 
 **Hooks**:
 - PostToolUse lint — runs `npm run lint` or `python -m flake8` after every file write
@@ -36,14 +36,13 @@ Multi-agent development workflow for any project. Manager coordinates, Engineer 
 
 ### Option 1: Install from git (recommended)
 ```bash
-/plugin install https://github.com/your-username/project-boilerplate claude-plugin
+/plugin install https://github.com/adihebbalae/Attacca claude-plugin
 ```
-> Replace with your actual repository URL before publishing.
 
 ### Option 2: Test locally
 ```bash
-git clone https://github.com/your-username/project-boilerplate
-claude --plugin-dir ./project-boilerplate/claude-plugin
+git clone https://github.com/adihebbalae/Attacca
+claude --plugin-dir ./Attacca/claude-plugin
 ```
 
 ### Option 3: Submit to Anthropic Plugin Marketplace
@@ -57,13 +56,13 @@ Once the plugin is enabled:
 
 ```
 # Start a new project
-/agent-boilerplate:init-project
+/attacca:init-project
 
 # When you have a task ready, delegate it:
-/agent-boilerplate:handoff-to-engineer TASK-001
+/attacca:handoff-to-engineer TASK-001
 
 # Before pushing, run a security audit:
-/agent-boilerplate:handoff-to-security TASK-001
+/attacca:handoff-to-security TASK-001
 ```
 
 The Manager agent is set as the default — it loads automatically. Just start chatting.
@@ -86,12 +85,12 @@ The Manager agent is set as the default — it loads automatically. Just start c
 ### Workflow
 1. **Manager** reads `.agents/state.json` at the start of every session
 2. **Manager** writes task handoffs to `.agents/handoff.md`
-3. You run `/agent-boilerplate:handoff-to-[agent] TASK-ID` to activate the right agent
+3. You run `/attacca:handoff-to-[agent] TASK-ID` to activate the right agent
 4. Agent executes, updates state, writes results back to `.agents/handoff.md`
 5. **Security** reviews before every push — Manager will not allow a push with CRITICAL findings
 
 ### MVP Mode
-When you select `mode: mvp` during `/agent-boilerplate:init-project`, agents skip non-essential quality checks and move faster. Useful for prototyping.
+When you select `mode: mvp` during `/attacca:init-project`, agents skip non-essential quality checks and move faster. Useful for prototyping.
 
 ---
 

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as https from 'node:https';
 import { ScaffoldConfig } from './types';
 
-const REPO = 'adihebbalae/copilot-code';
+const REPO = 'adihebbalae/Attacca';
 const VERSION_URL = `https://raw.githubusercontent.com/${REPO}/main/.github/BOILERPLATE_VERSION`;
 const CHANGELOG_URL = `https://raw.githubusercontent.com/${REPO}/main/CHANGELOG.md`;
 

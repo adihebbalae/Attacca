@@ -39,7 +39,7 @@ Write a handoff to `.agents/handoff.md` with:
 **Constraints**: [any limitations]
 ```
 
-Then tell the user to run `/agent-boilerplate:handoff-to-[agent] [TASK-ID]`.
+Then tell the user to run `/attacca:handoff-to-[agent] [TASK-ID]`.
 
 ### After Completion
 1. Review output from subagent

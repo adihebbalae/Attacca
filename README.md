@@ -1,4 +1,10 @@
-# Agent Boilerplate
+# Attacca
+
+<p align="center">
+  <img src="vscode-extension/media/icon.png" width="80" alt="Attacca icon" />
+</p>
+
+<p align="center"><em>attacca (Italian) — proceed to the next movement without pause.</em></p>
 
 **PRD → Project.** Paste a product requirements doc, answer a few questions, and a multi-agent system plans, builds, tests, and commits the code — while you review.
 
@@ -9,7 +15,7 @@ Orchestration layer for **any AI coding tool**: GitHub Copilot, Cursor, Cline, W
 ### Option A: Scaffold with CLI (recommended)
 
 ```bash
-npx create-agent-boilerplate my-project
+npx create-attacca my-project
 cd my-project
 ```
 
@@ -18,7 +24,7 @@ The CLI asks which tools you use, your LLM backend (cloud/local/hybrid), agent c
 ### Option B: Clone the template
 
 ```powershell
-gh repo create my-project-name --template adihebbalae/copilot-code --public --clone
+gh repo create my-project-name --template adihebbalae/Attacca --public --clone
 cd my-project-name
 ```
 
@@ -249,7 +255,7 @@ Use when you just want the end result, not step-by-step narration of the work.
 | `security-audit` | OWASP Top 10 security audit checklist |
 
 ---
-*Built with [adihebbalae copilot code](https://github.com/adihebbalae/Project_Boilerplate)*
+*Built with [Attacca](https://github.com/adihebbalae/Attacca)*
 | `tdd` | TDD workflow enforcing RED → GREEN → REFACTOR |
 | `quality-gate` | Pre-push gate: lint + type-check + test + security scan |
 | `update-workspace-map` | Auto-regenerate `.agents/workspace-map.md` post-commit |
