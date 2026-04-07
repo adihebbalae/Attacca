@@ -48,3 +48,4 @@ npm-debug.log*
 .agents/_dev
 .github/agents/meta-manager.agent.md
 .github/agents/meta-researcher.agent.md
+.github/scripts/backup.ps1

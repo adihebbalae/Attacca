@@ -117,7 +117,7 @@ Add the `auto_run` field to `.agents/state.json`:
   "task_order": ["TASK-001", "TASK-002", "TASK-003"],
   "checkpoint_seconds": 45,
   "max_retries": 3,
-  "security_between_tasks": true,
+  "security_between_tasks": false,
   "rate_limit_wait_hours": 5
 }
 ```
@@ -125,7 +125,7 @@ Add the `auto_run` field to `.agents/state.json`:
 - `task_order`: Explicit execution order (respects dependencies)
 - `checkpoint_seconds`: Pause between tasks (user can Ctrl+C during this window)
 - `max_retries`: Per-task retry limit before halting
-- `security_between_tasks`: Run security scan after each task
+- `security_between_tasks`: `false` (default) = one scan after all tasks complete; `true` = scan after each task
 - `rate_limit_wait_hours`: How long to wait if Claude CLI is rate-limited
 
 ### Step 3: Launch the Script
@@ -138,7 +138,7 @@ Tell the user:
 ║                                                              ║
 ║  Handoffs generated: [N] tasks                               ║
 ║  Route: Claude Code CLI (autonomous)                         ║
-║  Security: after each task                                   ║
+║  Security: after all tasks (end)                             ║
 ║  Checkpoint: [N]s between tasks                              ║
 ╚══════════════════════════════════════════════════════════════╝
 
@@ -149,13 +149,14 @@ Run this in your terminal:
 Options:
   -CheckpointSeconds 60    # Longer pause between tasks
   -MaxRetries 2            # Fewer retries before halting
-  -SkipSecurity            # Skip security scans (not recommended)
+  -SecurityBetweenTasks    # Scan after each task instead of at the end
+  -SkipSecurity            # Skip all security scans (not recommended)
   -DryRun                  # Preview without executing
 
 The script will:
 1. Execute each task via Claude Code CLI
-2. Run security audit after each task
-3. Pause [N]s between tasks (Ctrl+C to abort)
+2. Pause [N]s between tasks (Ctrl+C to abort)
+3. Run a single security audit after all tasks complete
 4. Halt on failure or CRITICAL security finding
 5. Update state.json throughout
 

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.3] - 2026-04-06
+
+### Fixed
+- **`auto-run.ps1` UTF-8 BOM encoding** — `Read-StateFile` now uses `[System.IO.File]::ReadAllText` with explicit UTF-8 encoding; `Save-StateFile` writes with `UTF8Encoding($false)` (no BOM). Prevents `ConvertFrom-Json` failures caused by PS 5.1's default BOM-prefixed UTF-8 output.
+- **`auto-run.ps1` resume `in_progress` tasks** — Tasks with status `in_progress` are now included in the pending task queue alongside `pending` and `not_started`, so interrupted runs resume correctly instead of skipping partially-completed tasks.
+
+### Added
+- **`-SecurityBetweenTasks` flag in `auto-run.ps1`** — New switch parameter. Default behavior is now one security scan after all tasks complete. Pass `-SecurityBetweenTasks` to restore the previous behavior of scanning after each individual task.
+
+### Changed
+- **`auto-run/SKILL.md`** — Updated launch banner and option docs to reflect new security default (end-only scan). Added `-SecurityBetweenTasks` to the options reference.
+
 ## [2.7.2] - 2026-04-05
 
 ### Added

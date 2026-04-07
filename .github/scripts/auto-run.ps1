@@ -33,7 +33,10 @@
     Hours to wait if Claude CLI hits rate limits. Default: 5.
 
 .PARAMETER SkipSecurity
-    Skip security scans between tasks. Not recommended.
+    Skip all security scans. Not recommended.
+
+.PARAMETER SecurityBetweenTasks
+    Run a security scan after EACH task instead of once at the end (default: end only).
 
 .PARAMETER DryRun
     Preview the execution plan without invoking Claude CLI.
@@ -41,6 +44,7 @@
 .EXAMPLE
     .\.github\scripts\auto-run.ps1
     .\.github\scripts\auto-run.ps1 -CheckpointSeconds 60 -MaxRetries 2
+    .\.github\scripts\auto-run.ps1 -SecurityBetweenTasks
     .\.github\scripts\auto-run.ps1 -DryRun
 #>
 
@@ -50,6 +54,7 @@ param(
     [int]$MaxRetries = 3,
     [double]$RateLimitWaitHours = 5,
     [switch]$SkipSecurity,
+    [switch]$SecurityBetweenTasks,
     [switch]$DryRun
 )
 
@@ -108,12 +113,18 @@ function Read-StateFile {
         Write-Error "State file not found: $StateFile"
         exit 1
     }
-    Get-Content $StateFile -Raw | ConvertFrom-Json
+    # Use .NET directly: Get-Content defaults to Windows-1252 on PS 5.1 (mojibake),
+    # and ReadAllText with UTF8 also strips BOM if present.
+    $raw = [System.IO.File]::ReadAllText($StateFile, [System.Text.Encoding]::UTF8)
+    $raw | ConvertFrom-Json
 }
 
 function Save-StateFile {
     param($State)
-    $State | ConvertTo-Json -Depth 10 | Set-Content $StateFile -Encoding UTF8
+    $json = $State | ConvertTo-Json -Depth 10
+    # UTF8Encoding($false) = no BOM. Set-Content -Encoding UTF8 on PS 5.1 writes BOM,
+    # which makes ConvertFrom-Json fail on the next read.
+    [System.IO.File]::WriteAllText($StateFile, $json, [System.Text.Encoding]::new('UTF-8', $false))
 }
 
 function Get-PendingTasks {
@@ -131,16 +142,18 @@ function Get-PendingTasks {
         $allTasks[$_.Name] = $_.Value
     }
 
+    $resumableStatuses = @("pending", "not_started", "in_progress")
+
     if ($order.Count -gt 0) {
         foreach ($id in $order) {
-            if ($allTasks.ContainsKey($id) -and $allTasks[$id].status -in @("pending", "not_started")) {
+            if ($allTasks.ContainsKey($id) -and $allTasks[$id].status -in $resumableStatuses) {
                 [void]$tasks.Add(@{ id = $id; data = $allTasks[$id] })
             }
         }
     }
     else {
         $allTasks.GetEnumerator() | Sort-Object Name | ForEach-Object {
-            if ($_.Value.status -in @("pending", "not_started")) {
+            if ($_.Value.status -in $resumableStatuses) {
                 [void]$tasks.Add(@{ id = $_.Key; data = $_.Value })
             }
         }
@@ -301,23 +314,34 @@ function Invoke-Claude {
         return @{ ExitCode = 0; Output = "[dry run - no execution]"; RawOutput = ""; RateLimited = $false; Usage = $emptyUsage; ElapsedMs = 0 }
     }
 
-    # Measure wall-clock time for this invocation
     $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
-    $rawOutput = $null
-    try {
-        # --output-format json: format flag only, NOT an extra API call or token spend.
-        # Returns a JSON blob containing the result text plus cost/usage metadata.
-        $rawOutput = & claude --agent $Agent -p --dangerously-skip-permissions --output-format json $Prompt 2>&1 |
-                     Out-String
-    }
-    catch {
-        $rawOutput = $_.Exception.Message
-    }
+    # Run claude in a background job so we can show a live elapsed ticker while it works.
+    # --output-format json: format flag only, NOT an extra API call or token spend.
+    $job = Start-Job -ScriptBlock {
+        param($agent, $prompt)
+        $raw = (& claude --agent $agent -p --dangerously-skip-permissions --output-format json $prompt 2>&1) | Out-String
+        [PSCustomObject]@{ Raw = $raw; ExitCode = $LASTEXITCODE }
+    } -ArgumentList $Agent, $Prompt
 
+    # Braille spinner + elapsed timer — updates in place via \r
+    $spinFrames = @('⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏')
+    $frameIdx   = 0
+    while ($job.State -eq 'Running') {
+        $e    = $sw.Elapsed
+        $eStr = if ($e.TotalMinutes -ge 1) { "$([int][math]::Floor($e.TotalMinutes))m $($e.Seconds.ToString('00'))s" } else { "$($e.Seconds)s" }
+        Write-Host "`r    $($spinFrames[$frameIdx % $spinFrames.Count]) $Agent  |  $eStr elapsed    " -NoNewline -ForegroundColor DarkCyan
+        $frameIdx++
+        Start-Sleep -Milliseconds 500
+    }
+    Write-Host ("`r" + (' ' * 52) + "`r") -NoNewline  # clear the ticker line
+
+    $jobData   = Receive-Job $job -Wait -ErrorAction SilentlyContinue
+    Remove-Job $job -Force
     $sw.Stop()
-    $exitCode = $LASTEXITCODE
-    if ($null -eq $exitCode) { $exitCode = 0 }
+
+    $rawOutput = if ($jobData -and $null -ne $jobData.Raw)      { [string]$jobData.Raw }      else { "" }
+    $exitCode  = if ($jobData -and $null -ne $jobData.ExitCode) { [int]$jobData.ExitCode }    else { 0 }
 
     # Extract plain text from JSON .result field for pattern matching (rate limit, CRITICAL, etc.)
     $textOutput = $rawOutput
@@ -419,8 +443,8 @@ if ($state.auto_run) {
         $RateLimitWaitHours = $state.auto_run.rate_limit_wait_hours
     }
     if ($state.auto_run.PSObject.Properties.Name -contains 'security_between_tasks') {
-        if (-not $state.auto_run.security_between_tasks -and -not $PSBoundParameters.ContainsKey('SkipSecurity')) {
-            $SkipSecurity = [switch]::new($true)
+        if ($state.auto_run.security_between_tasks -and -not $PSBoundParameters.ContainsKey('SecurityBetweenTasks')) {
+            $SecurityBetweenTasks = [switch]::new($true)
         }
     }
 }
@@ -444,7 +468,7 @@ Write-Host "  Project:     $($state.project)" -ForegroundColor White
 Write-Host "  Tasks:       $totalTasks pending" -ForegroundColor White
 Write-Host "  Checkpoint:  ${CheckpointSeconds}s" -ForegroundColor White
 Write-Host "  Retries:     $MaxRetries per task" -ForegroundColor White
-Write-Host "  Security:    $(if ($SkipSecurity) { 'SKIPPED' } else { 'after each task' })" -ForegroundColor White
+  Write-Host "  Security:    $(if ($SkipSecurity) { 'SKIPPED' } elseif ($SecurityBetweenTasks) { 'after each task' } else { 'after all tasks (end)' })" -ForegroundColor White
 Write-Host "  Rate limit:  wait ${RateLimitWaitHours}h on throttle" -ForegroundColor White
 Write-Host "  Usage:       tracked per task (--output-format json, no extra tokens)" -ForegroundColor White
 if ($DryRun) { Write-Host "  Mode:        DRY RUN" -ForegroundColor Yellow }
@@ -574,8 +598,8 @@ for ($i = 0; $i -lt $pendingTasks.Count; $i++) {
     $usageRegistry[$taskId] = $taskUsage
     Write-InlineUsage -Usage $taskUsage -ElapsedMs $result.ElapsedMs
 
-    # ── Security Scan ──
-    if (-not $SkipSecurity) {
+    # ── Per-task Security Scan (only when -SecurityBetweenTasks is set) ──
+    if (-not $SkipSecurity -and $SecurityBetweenTasks) {
         Write-TaskLine -TaskId $taskId -Title $taskTitle -Status "security" -Current $taskNum -Total $totalTasks
 
         $changedFiles  = Get-ChangedFiles
@@ -614,6 +638,53 @@ for ($i = 0; $i -lt $pendingTasks.Count; $i++) {
     if ($i -lt $pendingTasks.Count - 1) {
         $nextTask = $pendingTasks[$i + 1]
         Show-Countdown -Seconds $CheckpointSeconds -NextTaskId $nextTask.id
+    }
+}
+
+# ─── Final Security Scan (default path) ─────────────────────────────────────
+
+if (-not $SkipSecurity -and -not $SecurityBetweenTasks -and -not $halted -and $completed.Count -gt 0) {
+    Write-Banner "FINAL SECURITY SCAN" Cyan
+    Write-Host "  Auditing all changes from this run..." -ForegroundColor White
+    Write-Host ""
+
+    $allChangedFiles = & git diff --name-only "HEAD~$($completed.Count)" 2>$null
+    if (-not $allChangedFiles) { $allChangedFiles = Get-ChangedFiles }
+    $allChangedFiles = if ($allChangedFiles -is [array]) { $allChangedFiles -join ", " } else { $allChangedFiles }
+
+    $finalSecPrompt = "Audit the following files for security vulnerabilities: $allChangedFiles. " +
+        "Tasks completed: $($completed -join ', '). " +
+        "Report findings in compact format. Any CRITICAL finding is a hard blocker."
+
+    $finalSecResult = Invoke-Claude -Agent "security" -Prompt $finalSecPrompt
+
+    if ($finalSecResult.RateLimited) {
+        Write-Host "  Security scan rate limited - manual audit required before pushing." -ForegroundColor Yellow
+    }
+    elseif ($finalSecResult.Output -match "CRITICAL") {
+        Write-Banner "CRITICAL SECURITY FINDING" Red
+        Write-Host $finalSecResult.Output -ForegroundColor Red
+        Write-Host ""
+        Write-Host "  Push BLOCKED. Review findings before continuing." -ForegroundColor Red
+
+        $state = Read-StateFile
+        $state.security_status.open_findings    += 1
+        $state.security_status.cleared_for_push  = $false
+        $state.context.blocked_on                = "CRITICAL security finding in final scan"
+        $state.last_updated                      = (Get-Date -Format "o")
+        $state.last_updated_by                   = "auto-run"
+        Save-StateFile -State $state
+
+        $halted = $true
+    }
+    else {
+        Write-Host "  Security: PASS" -ForegroundColor Green
+
+        $state = Read-StateFile
+        $state.security_status.cleared_for_push = $true
+        $state.last_updated                     = (Get-Date -Format "o")
+        $state.last_updated_by                  = "auto-run"
+        Save-StateFile -State $state
     }
 }
 

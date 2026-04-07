@@ -1,1 +1,1 @@
-# Mock handoff for TASK-001
+# Mock handoff TASK-001
