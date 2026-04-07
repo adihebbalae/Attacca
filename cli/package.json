@@ -1,0 +1,35 @@
+{
+  "name": "create-agent-boilerplate",
+  "version": "3.0.0",
+  "description": "Scaffold a multi-agent AI coding boilerplate for any IDE — Copilot, Cursor, Cline, Windsurf, Claude Code, Antigravity, and more.",
+  "type": "module",
+  "bin": {
+    "create-agent-boilerplate": "./bin/index.js"
+  },
+  "keywords": [
+    "ai-agents",
+    "copilot",
+    "cursor",
+    "cline",
+    "windsurf",
+    "claude-code",
+    "antigravity",
+    "boilerplate",
+    "scaffold",
+    "cli"
+  ],
+  "author": "adihebbalae",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adihebbalae/copilot-code"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "templates/"
+  ]
+}

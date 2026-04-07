@@ -370,7 +370,11 @@ When the user wants to execute all approved tasks without manual intervention:
 1. **Load the skill**: Read `.github/skills/auto-run/SKILL.md` for the full protocol
 2. **Route**: All tasks small (≤3 files, ≤1 module)? → Copilot-native subagent loop. Any task large? → Claude CLI orchestrator script for all tasks
 3. **Generate handoffs**: Create `.agents/handoffs/[TASK-ID].md` for every pending task — each must be self-contained (Claude CLI sessions have no shared context)
-4. **Configure**: Add `auto_run` field to `state.json` with task order and settings
+4. **Configure**: Add `auto_run` field to `state.json` with task order and settings. **Required shape** — `state.json` MUST contain a `current_task` object (even if empty) or the script will crash with `PropertyNotFound`:
+   ```json
+   "current_task": { "id": "", "title": "", "status": "", "assigned_to": "" }
+   ```
+   If the file uses `active_task` (a string) instead, rename/replace it with the object above before running the script.
 5. **Launch**: Copilot-native → use `runSubagent` loop; Claude CLI → tell user to run `.github/scripts/auto-run.ps1`
 
 The script handles: sequential execution, security scans, 45s checkpoints, rate-limit detection (5h cooldown), and hard-stop on failure (3 retries).

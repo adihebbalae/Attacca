@@ -205,6 +205,32 @@ The script will pause and display options. If the user returns to Copilot:
 - Offer to continue remaining tasks via Copilot-native subagent loop (Section A)
 - Or advise waiting for the rate limit to reset
 
+### Script crashes with `NativeCommandError` on git calls
+**Cause**: `$ErrorActionPreference = "Stop"` converts any native-command stderr output (including git's harmless LF→CRLF warnings) into a terminating `NativeCommandError`.
+
+**Wrong fix — do NOT do this**:
+```powershell
+& git diff ... 2>$null | Where-Object { ... } -ErrorAction SilentlyContinue
+# ❌ -ErrorAction only applies to cmdlets, not expression results — parse error
+```
+
+**Correct fix** — temporarily override `$ErrorActionPreference` around each git call:
+```powershell
+# Top-level or inside a loop/block:
+$_prev = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
+$result = & git diff --name-only HEAD~1 2>$null
+$ErrorActionPreference = $_prev
+
+# Inside a function (function scope is automatic — no save/restore needed):
+function Get-ChangedFiles {
+    $ErrorActionPreference = 'SilentlyContinue'   # local to this call
+    $files = & git diff --name-only HEAD~1 2>$null
+    ...
+}
+```
+
+**Rule**: every bare `& git ...` call in the script must either (a) live inside a function that sets `$ErrorActionPreference = 'SilentlyContinue'`, or (b) be wrapped in a save/restore block at the call site. The `auto-run.ps1` script already implements this correctly.
+
 ---
 
 ## Configurable Defaults

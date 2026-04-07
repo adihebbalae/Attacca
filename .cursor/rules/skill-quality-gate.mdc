@@ -1,0 +1,35 @@
+---
+description: "Quality gate skill — pre-push checklist: lint → type-check → tests → security scan. Use before any git push, before opening a PR, after implementing a full feature."
+alwaysApply: false
+---
+
+# Quality Gate Skill
+
+Run this gate sequentially. Stop at the first failure.
+
+## Stage 1: Lint
+```bash
+npm run lint --if-present || python -m flake8 --quiet || true
+```
+Fix all lint errors before proceeding.
+
+## Stage 2: Type Check
+```bash
+npx tsc --noEmit || python -m mypy . || true
+```
+Fix all type errors before proceeding.
+
+## Stage 3: Tests
+```bash
+npm test || python -m pytest || true
+```
+All tests must pass. If any fail, fix and re-run.
+
+## Stage 4: Security Scan
+```bash
+npm audit --audit-level=high || pip-audit || true
+```
+No HIGH or CRITICAL vulnerabilities allowed.
+
+## Verdict
+All 4 stages must pass before pushing. Do not bypass with `--no-verify`.

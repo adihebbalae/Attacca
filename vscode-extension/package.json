@@ -1,0 +1,106 @@
+{
+  "name": "attacca",
+  "displayName": "Attacca",
+  "description": "Multi-agent AI coding orchestrator for VS Code. One command sets up a full Manager → Engineer → Security agent system with a live dashboard and one-click handoffs. Proceed without pause.",
+  "version": "3.0.0",
+  "publisher": "adihebbalae",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adihebbalae/copilot-code"
+  },
+  "homepage": "https://github.com/adihebbalae/copilot-code#readme",
+  "bugs": {
+    "url": "https://github.com/adihebbalae/copilot-code/issues"
+  },
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.87.0"
+  },
+  "categories": ["AI", "Other"],
+  "keywords": ["ai", "agents", "copilot", "multi-agent", "orchestration", "attacca", "handoff"],
+  "activationEvents": ["onStartupFinished"],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "attacca.init",
+        "title": "Attacca: Initialize Project",
+        "icon": "$(add)"
+      },
+      {
+        "command": "attacca.checkUpdates",
+        "title": "Attacca: Check for Updates",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "attacca.openState",
+        "title": "Attacca: Open State File",
+        "icon": "$(json)"
+      },
+      {
+        "command": "attacca.pickSkill",
+        "title": "Attacca: Pick a Skill",
+        "icon": "$(library)"
+      },
+      {
+        "command": "attacca.switchAgent",
+        "title": "Attacca: Switch Agent",
+        "icon": "$(account)"
+      },
+      {
+        "command": "attacca.showPanel",
+        "title": "Attacca: Show Dashboard"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "attacca-container",
+          "title": "Attacca",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "attacca-container": [
+        {
+          "type": "webview",
+          "id": "attacca.agentPanel",
+          "name": "Dashboard"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "attacca.init",
+          "when": "view == attacca.agentPanel",
+          "group": "navigation@1"
+        },
+        {
+          "command": "attacca.checkUpdates",
+          "when": "view == attacca.agentPanel",
+          "group": "navigation@2"
+        },
+        {
+          "command": "attacca.openState",
+          "when": "view == attacca.agentPanel",
+          "group": "navigation@3"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.87.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.24.0"
+  }
+}

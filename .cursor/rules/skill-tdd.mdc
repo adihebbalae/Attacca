@@ -1,0 +1,29 @@
+---
+description: "TDD workflow — RED → GREEN → REFACTOR. Use when implementing features test-first, writing unit or integration tests, building with test-heavy stacks."
+alwaysApply: false
+---
+
+# TDD Skill
+
+## Workflow: RED → GREEN → REFACTOR
+
+### RED: Write a failing test first
+1. Write the simplest test that describes the desired behavior
+2. Run the test — confirm it FAILS
+3. If it passes, the test is wrong or the behavior already exists
+
+### GREEN: Make it pass
+1. Write the minimum code to make the failing test pass
+2. Do NOT add extra functionality
+3. Run all tests — confirm they ALL pass
+
+### REFACTOR: Clean up
+1. Remove duplication
+2. Improve naming and structure
+3. Run all tests again — confirm they still pass
+
+## Rules
+- Never write implementation before a failing test exists
+- One behavior per test
+- Tests should be fast, isolated, and deterministic
+- Name tests descriptively: "should [behavior] when [condition]"

@@ -2,12 +2,22 @@
 
 **PRD → Project.** Paste a product requirements doc, answer a few questions, and a multi-agent system plans, builds, tests, and commits the code — while you review.
 
-Orchestration layer for GitHub Copilot, Claude Code, Codex CLI, and Gemini CLI: Manager (Haiku) coordinates, Engineer (Sonnet) implements, Security audits before every push. All modes share the same state files.
+Orchestration layer for **any AI coding tool**: GitHub Copilot, Cursor, Cline, Windsurf, Claude Code, Codex CLI, Gemini CLI, and Google Antigravity. Manager coordinates, Engineer implements, Security audits before every push. All modes share the same state files.
 
 ## Quick Start
 
+### Option A: Scaffold with CLI (recommended)
+
+```bash
+npx create-agent-boilerplate my-project
+cd my-project
+```
+
+The CLI asks which tools you use, your LLM backend (cloud/local/hybrid), agent complexity, and skill packs — then generates only the files you need.
+
+### Option B: Clone the template
+
 ```powershell
-# One command: creates a new GitHub repo from this template AND clones it
 gh repo create my-project-name --template adihebbalae/copilot-code --public --clone
 cd my-project-name
 ```
@@ -26,6 +36,21 @@ Paste your PRD. Research runs automatically. That's it — **PRD → Research �
 
 > **Note**: `/init-project` handles the `.gitignore.project` rename automatically.
 
+## Supported Tools
+
+| Tool | Config Format | Files |
+|------|--------------|-------|
+| **GitHub Copilot** | `.github/agents/*.agent.md` + `.github/copilot-instructions.md` | 7+ agent files, prompts, skills |
+| **Cursor** | `.cursor/rules/*.mdc` (YAML frontmatter) | 7 rule files with `alwaysApply` / agent-decision activation |
+| **Cline** | `.clinerules/*.md` (optional `paths:` frontmatter) | 6 rule files with path-conditional activation |
+| **Windsurf** | `.windsurfrules` (single file) | 1 concatenated protocol file |
+| **Claude Code CLI** | `CLAUDE.md` + `.claude/agents/*.md` | Bootstrap + subagent definitions + settings |
+| **Codex CLI** | `AGENTS.md` | Single bootstrap file (manual handoff mode) |
+| **Gemini CLI** | `GEMINI.md` + `.gemini/settings.json` | Bootstrap + hooks config |
+| **Google Antigravity** | `.agents/rules/*.md` + `.agents/workflows/*.md` | 4 rules + 3 workflows (native skill format match) |
+
+**Cross-compatibility note**: `AGENTS.md` is read natively by Cursor, Cline, and Zed. Zed also reads `.cursorrules`, `.windsurfrules`, `.clinerules`, `copilot-instructions.md`, `CLAUDE.md`, and `GEMINI.md`.
+
 ## Adaptive Workflow (Tools & Budget)
 
 When you run `/init-project`, Manager asks two setup questions to adapt the workflow:
@@ -41,13 +66,13 @@ When you run `/init-project`, Manager asks two setup questions to adapt the work
 
 ## Version History
 
-**Current version**: `v2.1.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
+**Current version**: `v3.0.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
 
 To update an existing project to the latest boilerplate version, run `/update-boilerplate` from the Manager agent.
 
 ## Multi-Mode Workflow
 
-This boilerplate works in four modes. All share the same state files.
+This boilerplate works in **eight modes**. All share the same state files.
 
 ### Mode 1: VS Code (GitHub Copilot)
 
@@ -61,14 +86,9 @@ Agents live in `.github/agents/*.agent.md`. Open the Copilot chat panel, select 
 Agents live in `.claude/agents/*.md`. Install Claude Code, run `claude` from the project root. Claude reads `CLAUDE.md` as a bootstrap and uses `.claude/agents/` for subagent definitions.
 
 ```bash
-# Install
 npm install -g @anthropic-ai/claude-code
-
-# Start from project root
 claude
 ```
-
-Hooks in `.claude/settings.json` automatically run lint after every file edit — no manual gate-running needed.
 
 ### Mode 3: Codex CLI
 
@@ -99,6 +119,22 @@ gemini
 
 Hooks in `.gemini/settings.json` automatically run lint after every file write. Gemini operates in **manual handoff mode** — the Manager plans and writes to `.agents/handoff.md`, and you open a new `gemini` session for each agent role.
 
+### Mode 5: Cursor
+
+Rules live in `.cursor/rules/*.mdc`. Open the project in Cursor — rules with `alwaysApply: true` load automatically; others activate based on Cursor's agent decision or glob patterns.
+
+### Mode 6: Cline
+
+Rules live in `.clinerules/*.md`. Install the Cline extension in VS Code. Rules without `paths:` frontmatter are always active; rules with `paths:` activate when editing matching files.
+
+### Mode 7: Windsurf
+
+Rules live in `.windsurfrules` (single file). Open the project in Windsurf — Cascade reads the rules automatically.
+
+### Mode 8: Google Antigravity
+
+Rules live in `.agents/rules/*.md`, workflows in `.agents/workflows/*.md`. Open the project in Antigravity — rules and slash-command workflows load natively. Antigravity's `.agents/skills/<name>/SKILL.md` format matches this boilerplate's existing skill structure.
+
 ### Switching Modes
 
 All modes share the same state files (`.agents/state.json`, `.agents/state.md`). You can switch mid-project:
@@ -110,7 +146,10 @@ All modes share the same state files (`.agents/state.json`, `.agents/state.md`).
 | Maximum autonomy (1M context, hooks, extended thinking) | Mode 2 |
 | OpenAI models, ChatGPT plan billing | Mode 3 |
 | Free tier (60 req/min, 1k req/day), Google account auth | Mode 4 |
-| Tight VS Code integration (extensions, LSP, editor tools) | Mode 1 |
+| Cursor AI with project rules + agent activation | Mode 5 |
+| Cline extension with path-conditional rules | Mode 6 |
+| Windsurf IDE with Cascade AI | Mode 7 |
+| Google Antigravity with native skill format | Mode 8 |
 
 ## Architecture
 
@@ -208,6 +247,9 @@ Use when you just want the end result, not step-by-step narration of the work.
 |-------|----------|
 | `code-review` | On-demand code review checklist |
 | `security-audit` | OWASP Top 10 security audit checklist |
+
+---
+*Built with [adihebbalae copilot code](https://github.com/adihebbalae/Project_Boilerplate)*
 | `tdd` | TDD workflow enforcing RED → GREEN → REFACTOR |
 | `quality-gate` | Pre-push gate: lint + type-check + test + security scan |
 | `update-workspace-map` | Auto-regenerate `.agents/workspace-map.md` post-commit |

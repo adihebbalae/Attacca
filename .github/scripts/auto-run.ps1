@@ -62,7 +62,11 @@ $ErrorActionPreference = "Stop"
 
 # ─── Resolve Paths ────────────────────────────────────────────────────────────
 
+# Temporarily suspend Stop so git's LF→CRLF warnings on stderr don't become
+# NativeCommandErrors. -ErrorAction cannot be applied to expression results.
+$_prevEAP = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
 $ProjectRoot = & git rev-parse --show-toplevel 2>$null
+$ErrorActionPreference = $_prevEAP
 if (-not $ProjectRoot) { $ProjectRoot = (Get-Location).Path }
 
 $AgentsDir    = Join-Path $ProjectRoot ".agents"
@@ -146,6 +150,8 @@ function Get-PendingTasks {
 
     if ($order.Count -gt 0) {
         foreach ($id in $order) {
+            # Skip null/empty entries — a trailing comma or blank line in task_order produces ''
+            if ([string]::IsNullOrWhiteSpace($id)) { continue }
             if ($allTasks.ContainsKey($id) -and $allTasks[$id].status -in $resumableStatuses) {
                 [void]$tasks.Add(@{ id = $id; data = $allTasks[$id] })
             }
@@ -153,7 +159,7 @@ function Get-PendingTasks {
     }
     else {
         $allTasks.GetEnumerator() | Sort-Object Name | ForEach-Object {
-            if ($_.Value.status -in $resumableStatuses) {
+            if (-not [string]::IsNullOrWhiteSpace($_.Key) -and $_.Value.status -in $resumableStatuses) {
                 [void]$tasks.Add(@{ id = $_.Key; data = $_.Value })
             }
         }
@@ -370,6 +376,9 @@ function Invoke-Claude {
 }
 
 function Get-ChangedFiles {
+    # Function-scoped override: git stderr warnings would be NativeCommandErrors
+    # under Stop EAP. Setting it here is local to this function call.
+    $ErrorActionPreference = 'SilentlyContinue'
     $files = & git diff --name-only HEAD~1 2>$null
     if (-not $files) { $files = & git diff --name-only --cached 2>$null }
     if (-not $files) { $files = & git diff --name-only 2>$null }
@@ -414,6 +423,12 @@ function Wait-ForRateLimit {
 
 # ─── Pre-flight Checks ───────────────────────────────────────────────────────
 
+# Verify Windows — this script uses Windows-specific behaviors (Start-Job, path separators)
+if (-not $IsWindows -and $PSVersionTable.PSVersion.Major -ge 6) {
+    Write-Error "This script is designed for Windows. On macOS/Linux, use a bash equivalent or run via WSL."
+    exit 1
+}
+
 # Verify claude CLI exists
 $claudeCmd = Get-Command claude -ErrorAction SilentlyContinue
 if (-not $claudeCmd -and -not $DryRun) {
@@ -444,7 +459,7 @@ if ($state.auto_run) {
     }
     if ($state.auto_run.PSObject.Properties.Name -contains 'security_between_tasks') {
         if ($state.auto_run.security_between_tasks -and -not $PSBoundParameters.ContainsKey('SecurityBetweenTasks')) {
-            $SecurityBetweenTasks = [switch]::new($true)
+            $SecurityBetweenTasks = [switch]$true
         }
     }
 }
@@ -501,22 +516,42 @@ for ($i = 0; $i -lt $pendingTasks.Count; $i++) {
     Write-Banner "TASK $taskNum/$totalTasks  $([char]0x2014)  $taskId" White
     Write-TaskLine -TaskId $taskId -Title $taskTitle -Status "starting" -Current $taskNum -Total $totalTasks
 
+    # Guard: a null/empty task ID means state.json is malformed
+    if ([string]::IsNullOrWhiteSpace($taskId)) {
+        Write-Host "  Task at index $i has an empty ID — skipping. Check task_order in state.json." -ForegroundColor Red
+        continue
+    }
+
     # Copy handoff file into place
     $srcHandoff = Join-Path $HandoffsDir "$taskId.md"
+    if (-not (Test-Path $srcHandoff)) {
+        Write-Host "  Handoff file not found: $srcHandoff" -ForegroundColor Red
+        Write-Host "  Re-run /auto-run in Copilot to regenerate handoffs, then retry." -ForegroundColor Yellow
+        $halted = $true; break
+    }
     Copy-Item $srcHandoff $HandoffFile -Force
+
+    # Resolve which agent to invoke. Fall back to "engineer" if unset.
+    $agentRole = if ($task.data.assigned_to -and -not [string]::IsNullOrWhiteSpace($task.data.assigned_to)) {
+        $task.data.assigned_to.Trim().ToLower()
+    } else { "engineer" }
 
     # Update state: in_progress
     $state = Read-StateFile
-    $state.current_task.id          = $taskId
-    $state.current_task.title       = $taskTitle
-    $state.current_task.status      = "in_progress"
-    $state.current_task.assigned_to = "engineer"
+    # current_task may not exist if state.json was hand-crafted or uses active_task instead.
+    # Replace it with a fresh object to avoid PropertyNotFound on null.
+    $state.current_task = [PSCustomObject]@{
+        id          = $taskId
+        title       = $taskTitle
+        status      = "in_progress"
+        assigned_to = $agentRole
+    }
     $state.tasks.$taskId.status     = "in_progress"
     $state.last_updated             = (Get-Date -Format "o")
     $state.last_updated_by          = "auto-run"
     Save-StateFile -State $state
 
-    # ── Engineer Execution (with retries) ──
+    # ── Task Execution (with retries) ──
     $success    = $false
     $attempts   = 0
 
@@ -528,13 +563,23 @@ for ($i = 0; $i -lt $pendingTasks.Count; $i++) {
 
         Write-TaskLine -TaskId $taskId -Title $taskTitle -Status "running" -Current $taskNum -Total $totalTasks
 
-        $engineerPrompt = "Read .agents/handoff.md and implement the assigned task ($taskId`: $taskTitle). " +
+        # Branch prompt by agent role. All agents must update state.json to keep
+        # the success-verification loop consistent. Security is read-only for code
+        # but writing state/findings files is always permitted.
+        $taskPrompt = if ($agentRole -eq "security") {
+            "Read .agents/handoff.md and perform the security audit for task ($taskId`: $taskTitle). " +
+            "Write your findings to .agents/security-$taskId.md (create it if it does not exist). " +
+            "When complete: update .agents/state.json — set tasks.$taskId.status to 'done' and add a brief " +
+            "summary to .agents/state.md. Do NOT modify application code."
+        } else {
+            "Read .agents/handoff.md and implement the assigned task ($taskId`: $taskTitle). " +
             "When complete: (1) commit changes with git add -A and git commit -m 'feat($taskId): [description]', " +
             "(2) update .agents/state.json - set tasks.$taskId.status to 'done', " +
             "(3) update .agents/state.md with a summary, " +
             "(4) update .agents/workspace-map.md if you created or moved files."
+        }
 
-        $result = Invoke-Claude -Agent "engineer" -Prompt $engineerPrompt
+        $result = Invoke-Claude -Agent $agentRole -Prompt $taskPrompt
 
         # Rate limit?
         if ($result.RateLimited) {
@@ -648,7 +693,9 @@ if (-not $SkipSecurity -and -not $SecurityBetweenTasks -and -not $halted -and $c
     Write-Host "  Auditing all changes from this run..." -ForegroundColor White
     Write-Host ""
 
+    $_prevEAP2 = $ErrorActionPreference; $ErrorActionPreference = 'SilentlyContinue'
     $allChangedFiles = & git diff --name-only "HEAD~$($completed.Count)" 2>$null
+    $ErrorActionPreference = $_prevEAP2
     if (-not $allChangedFiles) { $allChangedFiles = Get-ChangedFiles }
     $allChangedFiles = if ($allChangedFiles -is [array]) { $allChangedFiles -join ", " } else { $allChangedFiles }
 

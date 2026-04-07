@@ -17,6 +17,18 @@
 .github/skills/
 .github/copilot-instructions.md
 
+# IDE-specific adapters
+.cursor/
+.clinerules/
+.windsurfrules
+.claude/
+.gemini/
+.boilerplate/
+boilerplate.config.json
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+
 # =========================
 # Standard Ignores
 # =========================

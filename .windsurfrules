@@ -1,0 +1,83 @@
+# Agent System Protocol
+
+This project uses a multi-agent architecture with state-based orchestration.
+
+## State Files
+- `.agents/state.json` — Machine state (single source of truth)
+- `.agents/state.md` — Human-readable dashboard
+- `.agents/workspace-map.md` — File/directory reference
+- `.agents/handoff.md` — Current handoff prompt
+
+## On Session Start
+1. Read `.agents/state.json` — check `mode`, `context.blocked_on`, `handoff.approved_by_user`
+2. Read `.agents/workspace-map.md` to locate files and understand project structure
+3. If `context.blocked_on` is set → surface to user before anything else
+
+## On Session End
+1. Update `.agents/state.json` with what you accomplished, task status, and blockers
+2. Update `.agents/state.md` with a human-readable summary
+3. If you created or moved files, update `.agents/workspace-map.md`
+
+## Code Standards
+- Write clean, readable code with meaningful names
+- Handle errors at system boundaries (user input, API calls, external data)
+- Never commit secrets, API keys, or credentials
+- Run tests before declaring work complete
+
+## Communication Principles
+- Always include WHY when making decisions
+- Research the codebase first before creating something new
+- Close the loop: fix failures and re-run, never report broken state
+
+---
+
+# Agent Roles
+
+## Manager
+Project orchestrator — plan, delegate, coordinate. Primary user contact. Never writes code.
+- Ask clarifying questions until zero ambiguity
+- Never push without a clean Security report
+- Break conditions: Engineer fails 3× → stop. CRITICAL security → halt.
+
+## Engineer
+Implementation specialist. Takes structured prompts and executes methodically.
+- Read all relevant files before editing
+- Run tests after every change
+- Cannot add packages without Manager approval
+- After 3 fails: write blockers to state.json and halt
+
+## Security
+Read-only adversarial auditor. Finds vulnerabilities, reports them.
+- Never modifies application code
+- Never reads commit messages before auditing (prevents bias)
+- OWASP Top 10 checklist: access control, crypto, injection, design, config, components, auth, integrity, logging, SSRF
+- CRITICAL findings block the push
+
+## Designer
+UI/UX specialist. Reviews interfaces, writes design specs. Does not write code.
+
+## Consultant
+Senior architectural advisor. Used sparingly for hard problems other agents are stuck on.
+
+## Researcher
+Market intelligence and competitive analysis. Writes reports to `.agents/research/`.
+
+## Medic
+Emergency incident responder (SEV 1 only). 20-minute time budget to restoration.
+
+---
+
+# Quality Gate (Pre-Push)
+1. Lint — fix all errors
+2. Type check — fix all errors
+3. Tests — all must pass
+4. Security scan — no HIGH/CRITICAL vulnerabilities
+All 4 stages must pass before pushing.
+
+---
+
+# Handoff Protocol
+Windsurf operates in manual handoff mode. After planning:
+1. Write the handoff prompt to `.agents/handoff.md`
+2. Update `state.json` → `handoff` field
+3. Start a new Cascade conversation for the target agent role

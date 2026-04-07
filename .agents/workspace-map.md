@@ -8,47 +8,148 @@
 ```
 .github/
   copilot-instructions.md       # Base project instructions (always loaded)
+  BOILERPLATE_VERSION           # Semantic version (v3.0.0)
   agents/
     manager.agent.md             # Planner/orchestrator — user's primary contact
     engineer.agent.md            # Code executor — implements features
     security.agent.md            # Adversarial security auditor
     designer.agent.md            # UI/UX design consultant
     consultant.agent.md          # Deep reasoning specialist (Opus)
+    medic.agent.md               # Emergency incident responder
+    researcher.agent.md          # Product/market researcher
+    meta-manager.agent.md        # Boilerplate dev meta-manager
+    meta-researcher.agent.md     # Boilerplate dev meta-researcher
   copilot/
-    hooks.json                       # Copilot lifecycle hooks (pre-push → quality-gate, pre-commit → workspace-map)
+    hooks.json                   # Copilot lifecycle hooks
   prompts/
-    handoff-to-engineer.prompt.md   # Quick handoff template → Engineer
-    handoff-to-security.prompt.md   # Quick handoff template → Security
-    handoff-to-designer.prompt.md   # Quick handoff template → Designer
-    handoff-to-consultant.prompt.md # Quick handoff template → Consultant
-    init-project.prompt.md          # PRD intake (file/paste/idea), research, scaffolding, GitHub Issues, Context7 MCP
-    mvp.prompt.md                   # MVP mode: max velocity, aggressive parallelization, deferred gates
-    review-dependencies.prompt.md   # Pre-handoff dependency vetting for supply chain security
-    retrofit.prompt.md              # Retrofit existing projects; IDE-specific (VS Code, JetBrains, Eclipse, Xcode)
-    learn.prompt.md                 # Extract session patterns → copilot-instructions.md + Copilot Memory
-    remember-handoff.prompt.md      # Write handoff to Copilot Memory — eliminates copy-paste between agents
+    handoff-to-engineer.prompt.md
+    handoff-to-security.prompt.md
+    handoff-to-designer.prompt.md
+    handoff-to-consultant.prompt.md
+    handoff-to-researcher.prompt.md
+    init-project.prompt.md
+    mvp.prompt.md
+    review-dependencies.prompt.md
+    retrofit.prompt.md
+    learn.prompt.md
+    remember-handoff.prompt.md
+    auto-run.prompt.md
+    prd-builder.prompt.md
+    quickstart.prompt.md
+    setup-budget.prompt.md
+    list-modules.prompt.md
+    show-graph.prompt.md
+    update-boilerplate.prompt.md
+    git.prompt.md
+    hotfix.prompt.md
+    meta.prompt.md
+    btw.prompt.md
+    disable-agent.prompt.md
+    enable-agent.prompt.md
   skills/
-    code-review/SKILL.md              # On-demand code review checklist
-    security-audit/SKILL.md           # On-demand security audit checklist
-    tdd/SKILL.md                      # TDD workflow — RED → GREEN → REFACTOR
-    quality-gate/SKILL.md             # Pre-push gate: lint + type-check + test + security scan
-    update-workspace-map/SKILL.md     # Auto-regenerate workspace-map.md post-commit
-    supply-chain/SKILL.md             # Standalone 4-gate supply chain security (submittable to awesome-copilot)
-    sbom/SKILL.md                     # Native SBOM generation via syft/cdxgen + CVE scan via osv-scanner
-    auto-run/SKILL.md                 # Autonomous task runner — run all tasks to completion
+    code-review/SKILL.md
+    security-audit/SKILL.md
+    tdd/SKILL.md
+    quality-gate/SKILL.md
+    update-workspace-map/SKILL.md
+    supply-chain/SKILL.md
+    sbom/SKILL.md
+    auto-run/SKILL.md
+    incident-response/SKILL.md
+    product-research/SKILL.md
+    + 30 marketing skills (ab-test-setup, ad-creative, ai-seo, etc.)
   scripts/
-    auto-run.ps1                      # PowerShell orchestrator for Claude CLI autonomous execution
+    auto-run.ps1                 # PowerShell orchestrator for CLI autonomous execution
+    backup.ps1
 
 .agents/
   state.json                     # Machine-readable project state (source of truth)
   state.md                       # Human-readable project dashboard
-  workspace-map.md               # THIS FILE — directory reference
+  workspace-map.md               # THIS FILE
   handoff.md                     # Current inter-agent handoff prompt
-  handoffs/                      # Pre-generated handoffs for auto-run (one per task)
+  MODULES.md                     # Module registry (complex projects)
+  rules/                         # Antigravity adapter rules
+    protocol.md                  # Core protocol (Antigravity)
+    manager.md                   # Manager agent (Antigravity)
+    engineer.md                  # Engineer agent (Antigravity)
+    security.md                  # Security agent (Antigravity)
+  workflows/                     # Antigravity adapter workflows
+    init-project.md              # /init-project workflow
+    handoff-to-engineer.md       # /handoff-to-engineer workflow
+    handoff-to-security.md       # /handoff-to-security workflow
 
-.gitignore                       # TEMPLATE .gitignore (commits all agent files)
-.gitignore.project               # PROJECT .gitignore (rename after cloning — strips agent files)
+claude-plugin/                   # Claude Code native plugin (install with /plugin install)
+  .claude-plugin/
+    plugin.json                  # Plugin manifest (name: agent-boilerplate, v3.1.0)
+  agents/                        # Self-contained agents (inline protocol, no .github/ refs)
+    manager.md                   # Orchestrator — default agent via settings.json
+    engineer.md                  # Code implementation
+    security.md                  # Adversarial auditor (read-only)
+    designer.md                  # UI/UX reviewer
+    researcher.md                # Market/competitive research
+    consultant.md                # Architectural decisions (Opus)
+    medic.md                     # SEV 1 incident responder (Opus)
+  skills/                        # Model-invoked skill checklist (same SKILL.md format)
+    code-review/SKILL.md
+    quality-gate/SKILL.md
+    tdd/SKILL.md
+    security-audit/SKILL.md
+  commands/                      # User-invoked: /agent-boilerplate:<command>
+    init-project.md
+    handoff-to-engineer.md
+    handoff-to-security.md
+    handoff-to-designer.md
+    handoff-to-researcher.md
+    handoff-to-consultant.md
+  hooks/
+    hooks.json                   # PostToolUse lint hook
+  settings.json                  # Sets "agent": "manager"
+  README.md                      # Install instructions + quick start
+
+.cursor/                         # Cursor adapter
+  rules/
+    protocol.mdc                 # Core protocol (alwaysApply: true)
+    manager.mdc                  # Manager agent
+    engineer.mdc                 # Engineer agent
+    security.mdc                 # Security agent
+    skill-code-review.mdc        # Code review skill
+    skill-quality-gate.mdc       # Quality gate skill
+    skill-tdd.mdc                # TDD skill
+
+.clinerules/                     # Cline adapter
+  protocol.md                    # Core protocol (always active)
+  manager.md                     # Manager agent
+  engineer.md                    # Engineer agent (paths: src/**, lib/**)
+  security.md                    # Security agent
+  testing.md                     # Testing rules (paths: **/*.test.*)
+  quality-gate.md                # Quality gate
+
+.windsurfrules                   # Windsurf adapter (single concatenated file)
+
+.claude/                         # Claude Code CLI adapter
+  agents/                        # Subagent definitions
+  settings.json                  # Model, permissions, hooks
+
+.gemini/                         # Gemini CLI adapter
+  settings.json                  # Hooks configuration
+
+cli/                             # npx create-agent-boilerplate
+  package.json                   # CLI package config
+  bin/
+    index.js                     # Entry point (#!/usr/bin/env node)
+  src/
+    adapters.js                  # Adapter file generators (all 8 adapters)
+    shared.js                    # Shared state files generator
+
+CLAUDE.md                        # Claude Code CLI bootstrap
+AGENTS.md                        # Codex CLI bootstrap
+GEMINI.md                        # Gemini CLI bootstrap
 README.md                        # Boilerplate documentation
+CHANGELOG.md                     # Version history
+RETROFIT.md                      # Existing project migration guide
+.gitignore                       # Template .gitignore (commits agent files)
+.gitignore.project               # Project .gitignore (strips agent files)
+.claudeignore                    # Claude Code CLI token savings
 ```
 
 ## Key Directories

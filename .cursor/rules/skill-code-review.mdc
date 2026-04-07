@@ -1,0 +1,38 @@
+---
+description: "Code review skill — on-demand review checklist covering readability, correctness, performance, security, and maintainability. Use when reviewing code changes, PR review, self-review before committing."
+alwaysApply: false
+---
+
+# Code Review Skill
+
+## Review Process
+
+### 1. Correctness
+- Does the code do what it claims to do?
+- Are edge cases handled? (null, empty, zero, negative, overflow)
+- Are error paths tested, not just happy paths?
+- Are race conditions possible?
+
+### 2. Readability
+- Are names descriptive and consistent with codebase conventions?
+- Is the code self-documenting?
+- Are functions small and single-purpose?
+- Is nesting depth reasonable (max 3 levels)?
+
+### 3. Performance
+- No unnecessary database queries (N+1 problem)
+- No unnecessary re-renders or re-computations
+- Large data sets handled efficiently
+- No blocking operations on the main thread
+
+### 4. Security
+- No hardcoded secrets or API keys
+- User input validated and sanitized
+- Authentication/authorization checks present
+- SQL/XSS/injection vectors mitigated
+
+### 5. Maintainability
+- No code duplication (DRY)
+- Clear separation of concerns
+- Dependencies are justified and minimal
+- Tests exist for new functionality
