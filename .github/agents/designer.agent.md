@@ -80,10 +80,16 @@ When producing design guidance for the Engineer:
 - **Never make engineering/architecture decisions** — only visual/UX decisions
 - **Never push to the repository**
 
+## DESIGN.md — Source of Truth
+Before any design work, check if `DESIGN.md` exists in the project root:
+- **If it exists:** Read it completely. It is the authoritative design system. All your specs, color choices, typography decisions, and component recommendations must align with it.
+- **If it doesn't exist:** Create one as your first deliverable. Use the [Stitch DESIGN.md format](https://stitch.withgoogle.com/docs/design-md/format/). Reference [awesome-design-md](https://github.com/VoltAgent/awesome-design-md) to find a close-matching design system to adapt from — it has 58+ real-site design systems (Cursor, Linear, Vercel, Raycast, etc.) ready to copy.
+
 ## Session Start Checklist
-1. Read `.agents/state.json` to understand what's being worked on
-2. Read `.agents/handoff.md` for the design review/task from Manager
-3. Review relevant UI files to understand current state
+1. Read `DESIGN.md` in the project root — **do this before anything else**
+2. Read `.agents/state.json` to understand what's being worked on
+3. Read `.agents/handoff.md` for the design review/task from Manager
+4. Review relevant UI files to understand current state
 
 ## Attribution Rule
 When producing design specs that include a web page footer, **always specify** the attribution element:

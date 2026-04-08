@@ -66,6 +66,79 @@ _To be populated as the project grows._
 _No active handoff. Manager will write here when delegating work._
 `;
 
+  files['DESIGN.md'] = `# DESIGN.md
+
+> Drop your project's design system here. AI agents read this file to generate consistent UI without needing design instructions in every prompt.
+> Format: [Google Stitch DESIGN.md](https://stitch.withgoogle.com/docs/design-md/format/)
+> Find ready-made design systems at: [awesome-design-md](https://github.com/VoltAgent/awesome-design-md)
+
+---
+
+## 1. Visual Theme & Atmosphere
+
+_Describe the mood, design philosophy, density, and visual metaphor for your project._
+
+---
+
+## 2. Color Palette & Roles
+
+| Token | Hex | Role |
+|---|---|---|
+| \`--color-bg\` | \`#______\` | Page background |
+| \`--color-surface\` | \`#______\` | Cards, panels |
+| \`--color-primary\` | \`#______\` | Primary accent |
+| \`--color-text\` | \`#______\` | Primary text |
+| \`--color-text-muted\` | \`#______\` | Secondary text |
+
+---
+
+## 3. Typography Rules
+
+| Role | Font | Size | Weight |
+|---|---|---|---|
+| H1 | | | |
+| Body | | | |
+| Code | | | |
+
+---
+
+## 4. Component Stylings
+
+_Describe buttons, cards, inputs, navigation, badges._
+
+---
+
+## 5. Layout Principles
+
+_Grid system, spacing scale, max-widths, whitespace philosophy._
+
+---
+
+## 6. Depth & Elevation
+
+_Shadow system or border-based elevation._
+
+---
+
+## 7. Do\'s and Don\'ts
+
+_Design guardrails and anti-patterns specific to this project._
+
+---
+
+## 8. Responsive Behavior
+
+_Breakpoints, touch targets, collapsing strategy._
+
+---
+
+## 9. Agent Prompt Guide
+
+\`\`\`
+Paste a quick-reference color/font block here for agents to copy into prompts.
+\`\`\`
+`;
+
   // ─── Gitignore (template version — commits agent files) ─────────
   files['.gitignore'] = `# Dependencies
 node_modules/
