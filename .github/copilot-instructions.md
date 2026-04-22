@@ -95,3 +95,75 @@ Avoid over-engineering. Only make changes that are directly requested or clearly
 - Ask yourself: would a senior engineer call this overcomplicated? If yes, simplify.
 
 When a request is ambiguous, present interpretations — don't pick silently. Push back when a simpler approach exists.
+
+## Multi-Platform Release Workflow
+
+This boilerplate ships on THREE platforms simultaneously. When a user asks to "push" or "release", they mean a coordinated release across all three:
+
+1. **GitHub** (main repository) — always happens
+2. **VS Code Marketplace** — vscode-extension package
+3. **npm Registry** — CLI package (`create-attacca`)
+
+### Version Synchronization
+All three packages must use the **same version number** for each release:
+- `.github/BOILERPLATE_VERSION` — source of truth (e.g., `v3.4.0`)
+- `vscode-extension/package.json` → `version` field
+- `cli/package.json` → `version` field
+
+**Why**: Users expect the CLI version and VS Code extension version to match the boilerplate version. Mismatched versions cause confusion and support friction.
+
+### Release Checklist
+When releasing a new version:
+1. Update `.github/BOILERPLATE_VERSION` (semantic versioning: MAJOR.MINOR.PATCH)
+2. Add entry to `CHANGELOG.md` under new version heading
+3. Commit and push to GitHub (test suite runs, security audit passes)
+4. Bump `vscode-extension/package.json` version to match
+5. Bump `cli/package.json` version to match
+6. Publish to VS Code Marketplace: `cd vscode-extension && npx vsce publish --pat YOUR_PAT`
+7. Publish to npm: `cd cli && npm publish --access public`
+
+### Credentials Required
+- **VS Code Marketplace PAT**: Get from https://marketplace.visualstudio.com/manage/publishers/adihebbalae
+- **npm Authentication**: npm account with publish rights. Will prompt for OTP if 2FA is enabled.
+
+## Gotchas & Anti-Patterns
+
+### Version Drift Causes Chaos
+**Problem**: If `vscode-extension/package.json` version doesn't match `cli/package.json`, users see mismatched versions in the marketplace and npm. This breaks the unified brand.
+
+**Solution**: After every boilerplate version bump, immediately update both package.json files to the same version.
+
+**Example mistake**: Releasing boilerplate v3.4.0 but VS Code extension stays at v3.0.1 and CLI at v3.0.0.
+
+### .gitignore Blocks vscode-extension/ Changes
+**Problem**: `vscode-extension/` is in `.gitignore` by design. Trying to commit changes to `vscode-extension/package.json` is silently blocked.
+
+**Solution**: Use explicit paths when adding files:
+```bash
+git add vscode-extension/package.json
+git add cli/package.json
+```
+
+Do NOT use `git add .` — it will skip these files due to .gitignore.
+
+### npm Publish Requires Credentials & OTP
+**Problem**: `npm publish` requires authentication and will prompt for OTP if 2FA is enabled.
+
+**Solution**: Have your authenticator app ready before publishing. Don't attempt unattended publish without proper setup.
+
+### VS Code PAT Must Be in Session or Flagged
+**Problem**: `npx vsce publish` requires interactive PAT entry or a `--pat` flag. Cannot publish unattended.
+
+**Solution**: Use `npx vsce publish --pat YOUR_TOKEN`. Store PAT securely (not in git, not in shell history).
+
+## Agent Behavior: Multi-Channel Publishing
+
+When the user asks to "push", "release", or "publish", **assume it's a multi-platform release** unless explicitly told otherwise (e.g., "just push to GitHub").
+
+**Recommended flow**:
+1. Complete GitHub push (security audit, commit, push to main)
+2. Ask: "Also publish to VS Code Marketplace and npm?" (if user didn't specify)
+3. If yes: bump both package.json versions, build, publish to both platforms
+4. If no: stop and report
+
+**Why**: Users of the CLI and VS Code extension expect all three to stay in sync. Pushing to GitHub without updating npm/vscode feels incomplete.

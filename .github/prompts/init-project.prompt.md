@@ -339,6 +339,37 @@ Approve this plan? Or adjust before I scaffold?
 Once user approves:
 
 ### 9A: Clean Up Boilerplate Files
+
+**Step 1 — Remove unused adapter directories.**
+
+The boilerplate ships with config folders for every supported tool. Delete any that the user is NOT using (confirmed in Phase 4). Only keep what's actively selected.
+
+| Adapter | Directories / Files to delete if NOT selected |
+|---------|-----------------------------------------------|
+| Copilot | `.github/agents/`, `.github/copilot-instructions.md`, `.github/prompts/` |
+| Claude Code CLI | `CLAUDE.md`, `.claude/` |
+| Cursor | `.cursor/` |
+| Windsurf | `.windsurf/` |
+| Cline | `.clinerules` |
+| Codex CLI | `AGENTS.md` |
+| Gemini CLI | `GEMINI.md`, `.gemini/` |
+| Google Antigravity | `ANTIGRAVITY.md`, `.agents/workflows/`, `.agents/rules/`, `.agents/skills/` |
+
+Rules:
+- Delete the **entire directory** if the adapter is not selected (e.g., if not using Cursor, `rm -rf .cursor/`)
+- The `.agents/` directory (state files) is **always kept** — it's shared infrastructure. Only delete subdirectories inside `.agents/` that belong to a specific adapter (see Antigravity row above)
+- The `claude-plugin/` directory is kept only if Claude Code CLI is selected
+- `DESIGN.md` and `.github/skills/` are always kept (tool-agnostic)
+- Report exactly which directories were deleted in the Phase 10 summary
+
+```bash
+# Example: user selected Copilot only
+rm -rf .cursor/ .windsurf/ .gemini/ CLAUDE.md GEMINI.md ANTIGRAVITY.md AGENTS.md
+rm -rf .claude/ claude-plugin/ .clinerules
+rm -rf .agents/workflows/ .agents/rules/ .agents/skills/
+```
+
+**Step 2 — Rename gitignore.**
 1. Delete `.gitignore` (template version)
 2. Rename `.gitignore.project` → `.gitignore` (project version — strips agent files from git history)
 3. Ensure `.dev/` and `_dev/` are in `.gitignore`:

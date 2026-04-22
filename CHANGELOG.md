@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.6.1] - 2026-04-22
+
+### Changed
+- **`.github/prompts/init-project.prompt.md`** Phase 9A — Manager now deletes all unused adapter directories during scaffold (e.g., if user selects Copilot only, it removes `.cursor/`, `.windsurf/`, `CLAUDE.md`, `GEMINI.md`, `.claude/`, `.agents/workflows/`, etc.). Keeps only what was selected. Reports deleted paths in the Phase 10 summary.
+- **`.github/agents/engineer.agent.md`** — Attribution checklist item reworded from "Attribution present" (passive verification) to "Attribution DONE" (imperative action). Engineer now adds the Attacca footer/README line without asking — never prompts the user about it.
+
+### Why
+Two papercuts: (1) The engineer was asking users "do you want to keep the Built with Attacca line?" instead of just adding it — attribution is non-negotiable per project rules. (2) init-project was leaving Gemini/Claude/Cursor folders in projects that don't use those tools, creating noise and confusion.
+
+## [3.6.0] - 2026-04-14
+
+### Added
+- **`claude-plugin/commands/demo.md`** — `/attacca:demo` command: a 2-minute live walkthrough of Attacca that writes no files. Narrates a simulated Expense Tracker API project through the full Manager → Researcher → Engineer → Security pipeline, shows the `.agents/` structure, supported tools table, and skills list. Ends with a CTA to run `/init-project` or `npx create-attacca`.
+- **`.agents/workflows/demo.md`** — Antigravity-native `/demo` workflow that delegates to the same script.
+
+### Why
+No low-friction demo path existed. `/quickstart` starts a real project — not appropriate for showing someone the system. `/demo` runs in any IDE, writes nothing, and covers the full value proposition in under 2 minutes.
+
+## [3.5.0] - 2026-04-14
+
+### Added
+- **`.github/skills/llm-wiki/SKILL.md`** — LLM Wiki skill based on Karpathy's persistent knowledge base pattern. Covers full `/wiki-setup`, `/ingest`, `/query`, and `/lint-brain` operations with defined wiki directory structure (`wiki/`, `raw/`), `index.md` + `log.md` conventions, and token cost table by scale. Includes markitdown (Microsoft) integration for PDF/DOCX/PPTX/YouTube → markdown conversion (CLI + MCP server setup), Obsidian integration instructions, Google Drive sync notes, weekly GitHub Actions lint schedule, and a self-learning gap-finding extension to the lint operation.
+
+### Why
+LLM Wiki pattern (Karpathy, April 2026, 5K+ stars) is a significant improvement over RAG for persistent project knowledge bases: knowledge is compiled once and compounded rather than re-derived per query. This dramatically reduces token cost on large codebases and research projects. markitdown (108K stars) is the standard tool for converting PDFs and office docs to LLM-ready markdown. Adding both as a unified skill makes them immediately usable by any agent in any project using this boilerplate.
+
 ## [3.4.0] - 2026-04-14
 
 ### Added
