@@ -191,7 +191,40 @@ When 2+ isolated, non-dependent tasks are identified (typically from `.agents/MO
 
 For full protocol, see `.agents/parallelization-protocol.md`.
 
-### 9. Researcher Routing
+### 9. Per-PR Review (Parallel Mode) (v3.11.0+)
+
+When multiple branches are ready for review (e.g., outputs from parallel Engineer runs), use `/audit-prs` to fan out Security audits across all branches simultaneously. This solves the review bottleneck by parallelizing Security's work.
+
+**Workflow:**
+
+1. **Invoke parallel audits** — Run `/audit-prs feature/branch1 feature/branch2 ...` (or `/audit-prs --auto` to detect unpushed branches)
+2. **Security classifies results** — Each per-PR audit classifies the branch as SIMPLE or COMPLEX per `.agents/security-classifier.md`
+3. **Read the review queue** — Results populate `.agents/state.json` `review_queue`:
+   - `auto_land_candidates` — SIMPLE branches (if auto-land is enabled)
+   - `human_review` — COMPLEX branches (always requires human judgment)
+4. **Auto-land (optional)** — If your project has enabled `.agents/security-classifier.config.json` with `"auto_land_simple": true`, Manager auto-lands SIMPLE branches to local `main` (no remote push yet)
+5. **Review & merge** — For COMPLEX PRs, read the audit report in `.agents/audits/<pr-id>.md` and make human judgment calls. Simple branches merge locally first, then push all together.
+
+**Safety properties:**
+- No remote actions are automated (push remains explicit and human-gated)
+- Auto-land only applies to verified SIMPLE branches (0 HIGH/CRITICAL findings, no sensitive code paths, small diffs, verifiable BDR claims)
+- Audit trail is durable (all reports saved to `.agents/audits/`)
+- Auto-land is OFF by default (projects must explicitly opt in)
+
+**When to use parallel audits:**
+
+- After a parallel Engineer run that produced 2+ independent branches
+- When you have a stack of features to review and want to parallelize Security's time
+- When reviewing contributions from multiple sources (team members, open-source PRs)
+
+**When NOT to use:**
+
+- Single-branch review (use the standard pre-push Security flow instead)
+- Branches that depend on each other (deferred to merge coordinator in v3.12+)
+
+For the full classifier protocol and configuration options, see `.agents/security-classifier.md`.
+
+### 11. Researcher Routing
 
 Before building any new feature or entering a new market/product area, consider whether the Researcher should gather intelligence first. Route to Researcher when:
 
@@ -207,7 +240,7 @@ Before building any new feature or entering a new market/product area, consider 
 
 **Research output location**: Researcher writes full reports to `.agents/research/[topic-slug].md` — these persist across sessions and can be referenced in future handoffs.
 
-### 10. Consultant Auto-Escalation Rules
+### 12. Consultant Auto-Escalation Rules
 
 The Consultant (Opus) is expensive. Only escalate when the criteria below are met — do NOT use it for routine tasks. But when criteria are met, escalate immediately rather than letting the Engineer grind.
 
@@ -241,7 +274,7 @@ The Consultant (Opus) is expensive. Only escalate when the criteria below are me
 - Update the handoff with the specific implementation path
 - Re-delegate to Engineer with the Consultant's decision as a constraint
 
-### 11. Medic Emergency Response Rules
+### 13. Medic Emergency Response Rules
 
 The Medic (Opus) is for **SEV 1 incidents ONLY** — production crashes, critical flow failures, or broken deployments. Medic has autonomous deployment authority and operates without your approval gate.
 
@@ -299,7 +332,7 @@ Medic will:
 - Update `.agents/workspace-map.md` if Medic created/moved files
 - Add regression test to backlog
 
-### 12. Native Subagent Orchestration (v2.0)
+### 14. Native Subagent Orchestration (v2.0)
 
 This boilerplate supports two delegation modes:
 
@@ -378,7 +411,7 @@ All tasks halted. Acknowledge before resuming.
 1. Update `.agents/state.json`: task statuses, `last_updated`, `last_updated_by: "manager"`, new changelog entry
 2. Update `.agents/state.md` with human-readable summary
 
-### 13. Complex Project Mode (v2.1)
+### 15. Complex Project Mode (v2.1)
 
 **PREREQUISITE**: This mode requires Claude Code CLI available. Check `context.tools.claude_code_cli` in `.agents/state.json` before proceeding.
 
@@ -445,7 +478,7 @@ Then paste:
 - **Engineer**: updates `Status` and `Last Updated` on every commit touching a module
 - **Never delete MODULES.md** — it's the cross-session dependency graph for the full project lifecycle
 
-### 14. Autonomous Task Runner (`/auto-run`)
+### 16. Autonomous Task Runner (`/auto-run`)
 
 When the user wants to execute all approved tasks without manual intervention:
 

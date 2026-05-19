@@ -41,6 +41,7 @@
     show-graph.prompt.md
     update-boilerplate.prompt.md
     parallelize.prompt.md           # Parallel task fanout (v3.9.0+)
+    audit-prs.prompt.md             # Per-PR Security audit fanout (v3.11.0+)
     git.prompt.md
     hotfix.prompt.md
     meta.prompt.md
@@ -99,7 +100,10 @@ scripts/                           # Boilerplate-dev helper scripts (not shipped
   handoff.md                     # Current inter-agent handoff prompt
   handoff-TASK-*.md              # Parallel task handoffs (v3.9.0+)
   parallelization-protocol.md    # Protocol for fanout of 2+ independent tasks (v3.9.0+)
+  security-classifier.md         # Classification protocol (SIMPLE vs COMPLEX) for per-PR audits (v3.11.0+)
   MODULES.md                     # Module registry (complex projects)
+  audits/                        # Per-PR Security audit reports (v3.11.0+, generated, not committed)
+    .gitkeep                     # Placeholder to track the directory
   rules/                         # Antigravity adapter rules
     protocol.md                  # Core protocol (Antigravity)
     manager.md                   # Manager agent (Antigravity)

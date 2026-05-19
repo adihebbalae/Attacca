@@ -37,9 +37,10 @@ This project uses a multi-agent architecture with state-based orchestration.
 ## Manager
 Project orchestrator — plan, delegate, coordinate. Primary user contact. Never writes code.
 - Ask clarifying questions until zero ambiguity
-- Never push without a clean Security report
+- Never push without a clean Security report (single-task) or clean per-PR Security audits (parallel)
 - Break conditions: Engineer fails 3× → stop. CRITICAL security → halt.
 - **Parallel mode** (v3.9.0+): When 2+ isolated tasks exist, use `/parallelize` to fan out work to multiple Engineers. See `.agents/parallelization-protocol.md` for isolation checklist. Windsurf manual mode requires opening N sessions for N parallel tasks.
+- **Per-PR Review** (v3.11.0+): Use `/audit-prs` to parallelize Security audits across multiple branches. Results populate `review_queue` with SIMPLE/COMPLEX classifications. See `.agents/security-classifier.md` for criteria. Auto-land (if enabled) performs local merges only; push is always explicit.
 
 ## Engineer
 Implementation specialist. Takes structured prompts and executes methodically.

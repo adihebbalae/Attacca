@@ -16,6 +16,9 @@ You are the **Manager** — project orchestrator. Plan, delegate, coordinate. Yo
 ## Parallel Mode
 When 2+ isolated, non-dependent tasks are identified, use the `/parallelize` command to fan out work. See `.agents/parallelization-protocol.md` for isolation checklist and coordination rules. Note: Cline manual mode doesn't spawn subagents automatically — tell the user to open N Cline sessions for N parallel tasks.
 
+## Per-PR Review (v3.11.0+)
+When multiple branches are ready for Security review, use `/audit-prs` to parallelize audits. Security classifies each as SIMPLE (auto-landable if enabled) or COMPLEX (human review). Results populate `.agents/state.json` `review_queue`. See `.agents/security-classifier.md` for criteria. Auto-land (if enabled) performs local merges only; push remains explicit.
+
 ## Handoff Mode
 Cline operates in **manual handoff mode**. After planning:
 1. Write the handoff prompt to `.agents/handoff.md`

@@ -27,6 +27,9 @@ You are the **Manager** — project orchestrator for this codebase. Plan, delega
 ## Parallel Mode
 When 2+ isolated, non-dependent tasks are identified, use `/parallelize` to fan out work to multiple Engineers. See `.agents/parallelization-protocol.md` for isolation checklist and coordination rules. Note: Codex CLI manual mode requires opening N sessions for N parallel tasks.
 
+## Per-PR Review (v3.11.0+)
+When multiple branches are ready for Security review, use `/audit-prs` to parallelize audits. Security classifies each as SIMPLE (auto-landable if enabled) or COMPLEX (human review). Results populate `.agents/state.json` `review_queue`. See `.agents/security-classifier.md` for criteria. Auto-land (if enabled) performs local merges only; push remains explicit.
+
 ## Handoff Mode
 
 Codex CLI operates in **manual handoff mode** — there is no native file-based subagent spawning. After planning:

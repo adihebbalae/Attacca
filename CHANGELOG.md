@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.0] - 2026-05-19
+
+### Added
+- **`.agents/security-classifier.md`** — Classification protocol defining SIMPLE vs. COMPLEX pull requests for the per-PR Security audit flow. SIMPLE PRs (zero HIGH/CRITICAL, no sensitive paths, <300 lines, verifiable BDR) are candidates for auto-land (if enabled). COMPLEX PRs require human review. Includes examples, rationale, and tuning guidance.
+- **`.agents/audits/.gitkeep`** — Placeholder to track the audits directory. Per-PR Security audits write reports to `.agents/audits/<pr-id>.md` (generated, not committed).
+- **`.github/prompts/audit-prs.prompt.md`** — `/audit-prs` slash command for Copilot. Fans out Security audits across 2+ branches in parallel, classifies results, and populates `.agents/state.json` `review_queue` with SIMPLE/COMPLEX entries.
+- **`scripts/validate-parallel-security.mjs`** — Validation script checking: classifier doc exists, security agents have Per-PR Mode sections, all Manager protocol files reference "Per-PR Review", /audit-prs command exists, state.json _schema_notes mentions review_queue. Exit 0 if all checks pass.
+
+### Changed
+- **`.agents/state.json` `_schema_notes`** — Documented new optional `review_queue` field (v3.11.0+) with SIMPLE/COMPLEX classification results and auto-land audit trail. Field is schema-only; actual data lives in downstream projects.
+- **`.claude/agents/security.md`** — Added "Per-PR Mode (v3.11.0+)" section. Security can now audit individual branches and classify results per `.agents/security-classifier.md`. Includes anti-bias clarification: reading commit messages for per-PR audits is explicitly allowed (to verify BDR claims), unlike single-task mode.
+- **`.github/agents/security.agent.md`** — Added "Per-PR Mode (v3.11.0+)" section with structured audit report format, classification criteria reference, and updated subagent invocation rules to distinguish single-task (audit cold) vs. per-PR mode (read BDR claims).
+- **`CLAUDE.md`** — Added "Per-PR Review (Parallel Mode) (v3.11.0+)" section. Updated core rule: "NEVER push without a clean Security report" now covers both single-task and parallel modes. References `/audit-prs` command and classification protocol.
+- **`.github/agents/manager.agent.md`** — Added Section 9: "Per-PR Review (Parallel Mode) (v3.11.0+)". Describes `/audit-prs` workflow, SIMPLE/COMPLEX classification, optional auto-land, and safety properties (no remote ops, local merges only, durable audit trail). Renumbered subsequent sections 10→11, 11→12, etc. (was 9→10 before v3.11.0).
+- **`.github/copilot-instructions.md`** — Added "Per-PR Review (v3.11.0+)" subsection under Parallel Mode. Explains parallel Security audits solving the review bottleneck via parallelized classification.
+- **`.cursor/rules/manager.mdc`** — Added "Per-PR Review (v3.11.0+)" section referencing `/audit-prs`, classification, and review queue.
+- **`.clinerules/manager.md`** — Added "Per-PR Review (v3.11.0+)" section.
+- **`.windsurfrules`** — Added "Per-PR Review (v3.11.0+)" inline with Manager rules.
+- **`AGENTS.md`** — Added "Per-PR Review (v3.11.0+)" section.
+- **`GEMINI.md`** — Added "Per-PR Review (v3.11.0+)" section.
+- **`.agents/rules/manager.md`** — Added "Per-PR Review (v3.11.0+)" section.
+- **`claude-plugin/agents/manager.md`** — Updated core rules to reference both single-task and parallel Security modes, and noted per-PR Review with `/audit-prs` command.
+- **`.agents/workspace-map.md`** — Added `.agents/audits/.gitkeep`, `.agents/security-classifier.md`, and `.github/prompts/audit-prs.prompt.md` to the file registry.
+
+### Why
+This release ships **Parallel Per-PR Security Review** — solving the review bottleneck identified by four converging signals: Luca King's scaling question, internal research (review velocity = #1 methodology problem), external deep research (Transformer Mandate + BDR as antidote), and user observation (fast generation + high maintenance burden).
+
+**The problem**: Parallel Engineer runs (v3.9.0) mean multiple PRs in flight, but Security reviews serially (one at a time) — the human becomes the bottleneck. Each PR waits its turn, killing delivery velocity.
+
+**The solution**: Per-PR Security audits run in parallel via `/audit-prs`, classifying each branch as SIMPLE (auto-landable if enabled) or COMPLEX (needs human judgment). Results stream into a review queue for triage. SIMPLE classification means: zero HIGH/CRITICAL findings, no sensitive code touched, small diff, verifiable BDR claims. COMPLEX escalates to human review immediately.
+
+**Auto-land (v1)**: Projects may opt-in via `.agents/security-classifier.config.json` to auto-merge SIMPLE branches locally (preserving branch lineage with `--no-ff`). Push remains always explicit and human-gated — no remote operations are automated. Auto-land is OFF by default (safe default).
+
+**Why now**: The v3.10.0 BDR commit protocol means every PR documents its claims (Contract/Decision/Rationale). Per-PR Security can now verify those claims in parallel, unblocking delivery for boring, verifiable changes while escalating anything surprising to humans immediately. This is not automation for automation's sake — it's leverage against the human review bottleneck.
+
 ## [3.10.0] - 2026-05-19
 
 ### Added

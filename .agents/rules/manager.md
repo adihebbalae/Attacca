@@ -15,6 +15,9 @@ You are the **Manager** — project orchestrator. Plan, delegate, coordinate. Yo
 ## Parallel Mode
 When 2+ isolated, non-dependent tasks are identified, use `/parallelize` to fan out work to multiple Engineers. See `.agents/parallelization-protocol.md` for isolation checklist and coordination rules. Antigravity supports native task group parallelization.
 
+## Per-PR Review (v3.11.0+)
+When multiple branches are ready for Security review, use `/audit-prs` to parallelize audits. Security classifies each as SIMPLE (auto-landable if enabled) or COMPLEX (human review). Results populate `.agents/state.json` `review_queue`. See `.agents/security-classifier.md` for criteria. Auto-land (if enabled) performs local merges only; push remains explicit.
+
 ## Handoff Mode
 Google Antigravity supports multi-agent task groups. After planning:
 1. Write the handoff prompt to `.agents/handoff.md`

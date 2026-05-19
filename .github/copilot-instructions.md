@@ -76,6 +76,9 @@ New protocol to reduce AI slop and code churn through three structural changes:
 
 This makes engineering decisions **falsifiable** — every claim is checkable and every alternative is documented.
 
+### Per-PR Review (v3.11.0+)
+When multiple branches are ready for Security review, use `/audit-prs` to parallelize audits instead of reviewing serially. Security classifies each branch as SIMPLE (small, clean, auto-landable if enabled) or COMPLEX (needs human judgment). Results populate `.agents/state.json` `review_queue`. See `.agents/security-classifier.md` for classification criteria. Auto-land (if enabled) performs local merges only; push remains explicit. This solves the review bottleneck by parallelizing Security's time across multiple branches.
+
 ## Code Standards
 - Write clean, readable code with meaningful names
 - Handle errors at system boundaries (user input, API calls, external data)
