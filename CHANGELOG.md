@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.11.1] - 2026-05-19
+
+### Fixed
+- **`AGENTS.md`, `GEMINI.md`** — Core Rules "NEVER push" line now matches `CLAUDE.md` by referencing both single-task and per-PR Security audit modes (single-task mode) OR clean per-PR Security audits (parallel mode). Caught by the pre-push Security audit on v3.11.0 as a MEDIUM protocol-consistency finding; downstream Codex and Gemini CLI users would otherwise have missed that per-PR audits were available.
+
 ## [3.11.0] - 2026-05-19
 
 ### Added
