@@ -34,6 +34,11 @@ if (listOnly || !addonArg) {
   if (!addonArg) process.exit(0);
 }
 
+if (addonArg !== 'all' && !/^[a-z0-9_-]+$/i.test(addonArg)) {
+  console.error(`Invalid addon name: "${addonArg}". Names must be alphanumeric with hyphens/underscores only.`);
+  process.exit(1);
+}
+
 const targets = addonArg === 'all'
   ? readdirSync(ADDONS_DIR).filter(f => statSync(join(ADDONS_DIR, f)).isDirectory())
   : [addonArg];
