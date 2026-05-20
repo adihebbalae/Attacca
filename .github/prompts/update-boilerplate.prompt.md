@@ -24,18 +24,42 @@ Run this to pull fresh copies of all boilerplate files into a temp directory:
 
 ```bash
 # Clone or sparse-checkout the template repo (no full clone needed)
-git clone --depth 1 --filter=blob:none --sparse https://github.com/adihebbalae/copilot-code.git /tmp/copilot-code-latest
-cd /tmp/copilot-code-latest
-git sparse-checkout set .github .agents
+git clone --depth 1 --filter=blob:none --sparse https://github.com/adihebbalae/Attacca.git /tmp/attacca-latest
+cd /tmp/attacca-latest
+git sparse-checkout set .github .agents CHANGELOG.md
 ```
 
-If `git` access fails (e.g. auth or network), tell the user to manually download the archive from https://github.com/adihebbalae/copilot-code/archive/refs/heads/main.zip and extract to `/tmp/copilot-code-latest/`, then continue.
+If `git` access fails (e.g. auth or network), tell the user to manually download the archive from https://github.com/adihebbalae/Attacca/archive/refs/heads/master.zip and extract to `/tmp/attacca-latest/`, then continue.
 
 ---
 
-## Step 3: Identify Changed Files
+## Step 3: Compare Versions and Show Changelog
 
-Compare these boilerplate-owned files between `/tmp/copilot-code-latest/` and the current project:
+Read `.github/BOILERPLATE_VERSION` from `/tmp/attacca-latest/` to extract the latest version string (first line, e.g. `v3.12.1`).
+
+**Version check:**
+- If current == latest: say "You're already on [version] — the latest." and stop.
+- If current < latest: continue.
+
+**Changelog diff:** Read `CHANGELOG.md` from `/tmp/attacca-latest/`. Extract all `## [x.y.z]` sections that fall between the current version (exclusive) and the latest version (inclusive) — i.e. everything the user hasn't seen yet.
+
+Display as:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  What's new: [current] → [latest]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[extracted changelog sections verbatim]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+If `CHANGELOG.md` is missing or the version range can't be found: say "Changelog unavailable for this range — review manually at https://github.com/adihebbalae/Attacca/blob/master/CHANGELOG.md"
+
+---
+
+## Step 4: Identify Changed Files
+
+Compare these boilerplate-owned files between `/tmp/attacca-latest/` and the current project:
 
 **AUTO-UPDATE (no project customization expected):**
 - `.github/agents/*.agent.md`
@@ -73,7 +97,7 @@ If there are no changes: say "You're already up to date." and stop.
 
 ---
 
-## Step 4: Preview Manual Review Files
+## Step 5: Preview Manual Review Files
 
 For any file in the MANUAL REVIEW list that changed, show the diff inline so the user can decide what to merge:
 
@@ -89,17 +113,17 @@ Wait for user answer before proceeding.
 
 ---
 
-## Step 5: Apply Updates
+## Step 6: Apply Updates
 
 For each AUTO-UPDATE file that changed or is new:
-- Copy from `/tmp/copilot-code-latest/` to the project path
+- Copy from `/tmp/attacca-latest/` to the project path
 - Report: `✅ Updated: .github/agents/manager.agent.md`
 
 Apply MANUAL REVIEW files only if the user chose (A) in Step 4.
 
 ---
 
-## Step 6: Update Version File
+## Step 7: Update Version File
 
 Read the `BOILERPLATE_VERSION` from the latest template and write it to `.github/BOILERPLATE_VERSION`.
 
@@ -107,15 +131,15 @@ Tell the user: "Updated to [new version]."
 
 ---
 
-## Step 7: Clean Up
+## Step 8: Clean Up
 
 ```bash
-rm -rf /tmp/copilot-code-latest
+rm -rf /tmp/attacca-latest
 ```
 
 ---
 
-## Step 8: Final Report
+## Step 9: Final Report
 
 Output a summary:
 
