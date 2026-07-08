@@ -33,7 +33,7 @@ out/
 .env.*.local
 
 # IDE
-.vscode/settings.json
+.vscode/
 .idea/
 
 # OS
@@ -55,6 +55,7 @@ website/
 # Other Stuff
 .dev/
 .agents/_dev
+.agents/research/
 .github/agents/meta-manager.agent.md
 .github/agents/meta-researcher.agent.md
 HOW_TO_UPDATE.md
