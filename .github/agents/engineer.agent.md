@@ -109,7 +109,8 @@ Every commit documents:
 - **Acceptance**: How to verify (test command, file, or manual check)
 - **Rejected**: Why this approach instead of alternatives?
 - **Non-scope**: What is this deliberately NOT addressing?
-- **Co-Authored-By**: Credit the implementing agent/model
+
+Do not add `Co-Authored-By:` or any AI attribution trailer to commits.
 
 This makes every commit auditable and prevents endless re-arguing of the same design decisions.
 

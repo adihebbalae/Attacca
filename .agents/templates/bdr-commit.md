@@ -18,8 +18,6 @@ Rejected: <brief note on alternatives considered and why this approach was chose
 Non-scope: <what this commit deliberately doesn't address, to prevent future confusion>
 
 <optional longer body explaining context, tradeoffs, or implementation notes>
-
-Co-Authored-By: [Agent Name] <[email]>
 ```
 
 ## Field Definitions
@@ -73,16 +71,7 @@ Examples:
 
 This documents *deliberate scope boundaries* and prevents misalignment later.
 
-### `Co-Authored-By:`
-**Agent attribution**: Which AI agent or person created this commit?
-
-Examples:
-```
-Co-Authored-By: Engineer Agent <noreply@anthropic.com>
-Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
-```
-
-Required for boilerplate commits. Optional but encouraged for project work.
+**Note**: Do not add `Co-Authored-By:` or any other AI attribution trailer to commits. Agent identity belongs in `.agents/state.json` / handoff files, not in git history.
 
 ---
 
@@ -124,8 +113,6 @@ Implementation notes:
 - Refresh tokens rotated every 7 days (Firebase default)
 - Logout clears local session + revokes refresh token
 - Error messages are generic (no info leakage if account doesn't exist)
-
-Co-Authored-By: Engineer Agent <noreply@anthropic.com>
 ```
 
 ---
@@ -137,6 +124,6 @@ Before committing:
 - [ ] **Acceptance is runnable** — someone can execute exactly what you wrote
 - [ ] **Rejected alternatives are real** — you actually considered them (don't fabricate)
 - [ ] **Non-scope is honest** — these are deliberate boundaries, not overlooked work
-- [ ] **Co-Authored-By is included** (required in Attacca projects)
+- [ ] **No AI attribution trailer** — no `Co-Authored-By`, "Generated with", or similar added to the commit
 
 If you can't fill in a section, it means you haven't finished thinking through the task. Stop, think, then write.

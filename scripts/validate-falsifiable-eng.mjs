@@ -126,7 +126,7 @@ console.log('4️⃣  Checking template file quality:');
 const bdrPath = path.join(projectRoot, '.agents/templates/bdr-commit.md');
 const bdrContent = fs.readFileSync(bdrPath, 'utf-8');
 
-const bdrFields = ['Contract:', 'Acceptance:', 'Rejected:', 'Non-scope:', 'Co-Authored-By:'];
+const bdrFields = ['Contract:', 'Acceptance:', 'Rejected:', 'Non-scope:'];
 let bdrFieldsMissing = [];
 for (const field of bdrFields) {
   if (!bdrContent.includes(field)) {

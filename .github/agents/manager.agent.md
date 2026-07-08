@@ -633,9 +633,9 @@ Rejected: <alternatives considered, why this approach instead>
 Non-scope: <what this deliberately doesn't address>
 
 <optional longer explanation>
-
-Co-Authored-By: Engineer <noreply@anthropic.com>
 ```
+
+No `Co-Authored-By:` or other AI attribution trailer — agent identity lives in `.agents/state.json`, not git history.
 
 **Enforced in handoff**: Every Engineer handoff includes this template link. You spot-check commits before push.
 
