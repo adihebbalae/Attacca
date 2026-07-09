@@ -1,9 +1,6 @@
 {
-  "model": "sonnet",
   "env": {
-    "MAX_THINKING_TOKENS": "10000",
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "50",
-    "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
+    "MAX_THINKING_TOKENS": "10000"
   },
   "hooks": {
     "PreToolUse": [
@@ -12,18 +9,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.claude/hooks/read-once.sh\""
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "cd \"$(git rev-parse --show-toplevel 2>/dev/null || echo .)\" && (npm run lint --silent --if-present 2>/dev/null || python -m flake8 --quiet 2>/dev/null || true) && echo '✓ lint'"
+            "command": "node \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/plugins/attacca-core/hooks/read-once.mjs\""
           }
         ]
       }

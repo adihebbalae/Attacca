@@ -1,404 +1,53 @@
 # Attacca
 
-<p align="center">
-  <img src="vscode-extension/media/icon.png" width="80" alt="Attacca icon" />
-</p>
-
 <p align="center"><em>attacca (Italian) — proceed to the next movement without pause.</em></p>
 
-**PRD → Project.** Paste a product requirements doc, answer a few questions, and a multi-agent system plans, builds, tests, and commits the code — while you review.
+**A context-engineering toolkit for Claude Code.** Three plugins that add what the model can't provide for itself: the questions your project needs answered before building, and the gates it can't skip before shipping.
 
-Orchestration layer for **any AI coding tool**: GitHub Copilot, Cursor, Cline, Windsurf, Claude Code, Codex CLI, Gemini CLI, and Google Antigravity. Manager coordinates, Engineer implements, Security audits before every push. All modes share the same state files.
+Attacca 4.0 ships nothing the model already knows how to do. Every artifact is either **context** (interrogation frameworks, decision records) or **verification** (hooks, audits, gates) — see [docs/DESIGN-DECISIONS.md](docs/DESIGN-DECISIONS.md).
 
-## Quick Start
+## Install
 
-### Option A: Scaffold with CLI (recommended)
+```
+/plugin marketplace add adihebbalae/Attacca
+/plugin install attacca-core@attacca
+/plugin install attacca-security@attacca
+/plugin install attacca-init@attacca
+```
+
+Install only what you need — each plugin works standalone.
+
+| Plugin | What it adds |
+|---|---|
+| **attacca-core** | Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, more), `critic` + `researcher` subagents, token-saving read-once hook, auto-lint hook |
+| **attacca-security** | Security-audit / supply-chain / SBOM skills, an isolated-context `security-auditor` subagent, and a hook that **blocks `git push` until a fresh clean audit exists** |
+| **attacca-init** | `/interrogate` — turns "build me a webstore with stripe and auth" into structured questions (auth, payments, data, hosting, budget, non-goals) and a committed `CONTEXT.md` spec — plus init-project, retrofit, mvp |
+
+## Start a project
 
 ```bash
-npx create-attacca my-project
-cd my-project
+mkdir my-app && cd my-app && git init && claude
 ```
 
-The CLI asks which tools you use, your LLM backend (cloud/local/hybrid), agent complexity, and skill packs — then generates only the files you need.
+Then: install the plugins, describe what you want to build, and `/interrogate` fires on anything ambiguous. Answers become `CONTEXT.md` — the committed file every future session (and teammate, and cloud agent) reads to orient. End sessions with `/wrap-session` to keep it current.
 
-### Option B: Clone the template
+For the minimal per-project files (CLAUDE.md, AGENTS.md, CONTEXT.md skeleton, settings.json), copy [`template/`](template/) — four small files, that's the whole footprint. Existing codebase? Run `/retrofit`.
 
-```powershell
-gh repo create my-project-name --template adihebbalae/Attacca --public --clone
-cd my-project-name
-```
+## Using another tool?
 
-Then:
-1. Open the folder in VS Code with GitHub Copilot + Claude models enabled
-2. Select the **Manager** agent in the Copilot chat panel
-3. For any project: use `/init-project` with your PRD
-4. Manager runs: PRD → Research → Setup Questions → Clarifications → Scaffold
-   - **Research Phase**: Researcher gathers competitive/market/tech intelligence
-   - **Setup Questions**: Tools & budget adapted automatically
-   - **Clarifications**: PRD edge cases resolved
-   - **Scaffold**: All decisions grounded in research findings
+`template/AGENTS.md` is the [cross-tool standard](https://agents.md) read natively by Copilot, Cursor, Codex, and 30+ agents (Claude Code loads it via the `@AGENTS.md` import in CLAUDE.md). That one file is Attacca's entire multi-tool story — the v3 per-tool ports live on the [`legacy/v3`](../../tree/legacy/v3) branch.
 
-Paste your PRD. Research runs automatically. That's it — **PRD → Research → Project.**
+## Docs
 
-> **Note**: `/init-project` handles the `.gitignore.project` rename automatically.
+- [Plugin architecture](docs/PLUGIN-ARCHITECTURE.md) — what's in each plugin and how they loop together
+- [CONTEXT.md schema](docs/CONTEXT-SCHEMA.md) — the project-memory convention
+- [Migrating from v3](docs/MIGRATION-v3-to-v4.md) — state.json → CONTEXT.md, personas → subagents
+- [Design decisions](docs/DESIGN-DECISIONS.md) — why 4.0 looks like this
 
-## Supported Tools
+## Version
 
-| Tool | Config Format | Files |
-|------|--------------|-------|
-| **GitHub Copilot** | `.github/agents/*.agent.md` + `.github/copilot-instructions.md` | 7+ agent files, prompts, skills |
-| **Cursor** | `.cursor/rules/*.mdc` (YAML frontmatter) | 7 rule files with `alwaysApply` / agent-decision activation |
-| **Cline** | `.clinerules/*.md` (optional `paths:` frontmatter) | 6 rule files with path-conditional activation |
-| **Windsurf** | `.windsurfrules` (single file) | 1 concatenated protocol file |
-| **Claude Code CLI** | `CLAUDE.md` + `.claude/agents/*.md` | Bootstrap + subagent definitions + settings |
-| **Codex CLI** | `AGENTS.md` | Single bootstrap file (manual handoff mode) |
-| **Gemini CLI** | `GEMINI.md` + `.gemini/settings.json` | Bootstrap + hooks config |
-| **Google Antigravity** | `.agents/rules/*.md` + `.agents/workflows/*.md` | 4 rules + 3 workflows (native skill format match) |
-
-**Cross-compatibility note**: `AGENTS.md` is read natively by Cursor, Cline, and Zed. Zed also reads `.cursorrules`, `.windsurfrules`, `.clinerules`, `copilot-instructions.md`, `CLAUDE.md`, and `GEMINI.md`.
-
-## Adaptive Workflow (Tools & Budget)
-
-When you run `/init-project`, Manager asks two setup questions to adapt the workflow:
-
-| Question | Options | Impact |
-|----------|---------|--------|
-| **Do you have a CLI agent?** | Yes / No | No CLI? Everything routes through GitHub Copilot (160k context). Have CLI (Claude Code, Codex, or Gemini)? Unlock Complex Project Mode for 20+ file projects. |
-| **What's your budget?** | Free tier / Paid / TBD | Free? Manager adds a research task to find free deployment options. Paid? Use production-grade tools from day one. |
-
-**Why?** This ensures the boilerplate works for everyone: Copilot-only users, budget-conscious teams, and power users with CLI access. Your answers are saved in `.agents/state.json` and used by Manager for routing decisions.
-
-**Want to change your answers later?** Run `/setup-budget` anytime.
-
-## Version History
-
-**Current version**: `v3.8.0` — See [CHANGELOG.md](CHANGELOG.md) for full version history and upgrade notes.
-
-To update an existing project to the latest boilerplate version, run `/update-boilerplate` from the Manager agent.
-
-## Multi-Mode Workflow
-
-This boilerplate works in **eight modes**. All share the same state files.
-
-### Mode 1: VS Code (GitHub Copilot)
-
-Agents live in `.github/agents/*.agent.md`. Open the Copilot chat panel, select **Manager**, and start.
-
-- **Autonomous (VS Code Feb 2026+)**: Manager spawns subagents automatically after you approve the plan. No copy-pasting prompts. Requires `github.copilot.chat.claudeAgent.enabled: true` in VS Code settings.
-- **Manual (any VS Code version)**: Manager writes handoffs to `.agents/handoff.md`. You copy them to the target agent using `/handoff-to-[agent]` prompts.
-
-### Mode 2: Claude Code CLI
-
-Agents live in `.claude/agents/*.md`. Install Claude Code, run `claude` from the project root. Claude reads `CLAUDE.md` as a bootstrap and uses `.claude/agents/` for subagent definitions.
-
-```bash
-npm install -g @anthropic-ai/claude-code
-claude
-```
-
-### Mode 3: Codex CLI
-
-Install Codex CLI, run `codex` from the project root. Codex reads `AGENTS.md` as a bootstrap.
-
-```bash
-# Install
-npm install -g @openai/codex
-# or: brew install --cask codex
-
-# Start from project root
-codex
-```
-
-Codex operates in **manual handoff mode** — the Manager plans and writes to `.agents/handoff.md`, and you open a new `codex` session for each agent role. All state is shared via `.agents/`.
-
-### Mode 4: Gemini CLI
-
-Install Gemini CLI, run `gemini` from the project root. Gemini reads `GEMINI.md` as a bootstrap.
-
-```bash
-# Install
-npm install -g @google/gemini-cli
-
-# Start from project root (sign in with Google on first run)
-gemini
-```
-
-Hooks in `.gemini/settings.json` automatically run lint after every file write. Gemini operates in **manual handoff mode** — the Manager plans and writes to `.agents/handoff.md`, and you open a new `gemini` session for each agent role.
-
-### Mode 5: Cursor
-
-Rules live in `.cursor/rules/*.mdc`. Open the project in Cursor — rules with `alwaysApply: true` load automatically; others activate based on Cursor's agent decision or glob patterns.
-
-### Mode 6: Cline
-
-Rules live in `.clinerules/*.md`. Install the Cline extension in VS Code. Rules without `paths:` frontmatter are always active; rules with `paths:` activate when editing matching files.
-
-### Mode 7: Windsurf
-
-Rules live in `.windsurfrules` (single file). Open the project in Windsurf — Cascade reads the rules automatically.
-
-### Mode 8: Google Antigravity
-
-Rules live in `.agents/rules/*.md`, workflows in `.agents/workflows/*.md`. Open the project in Antigravity — rules and slash-command workflows load natively. Antigravity's `.agents/skills/<name>/SKILL.md` format matches this boilerplate's existing skill structure.
-
-### Switching Modes
-
-All modes share the same state files (`.agents/state.json`, `.agents/state.md`). You can switch mid-project:
-
-| What you need | Use |
-|---------------|-----|
-| VS Code native IDE experience, Copilot billing | Mode 1 |
-| Autonomous subagents, long-running tasks, Claude billing | Mode 2 |
-| Maximum autonomy (1M context, hooks, extended thinking) | Mode 2 |
-| OpenAI models, ChatGPT plan billing | Mode 3 |
-| Free tier (60 req/min, 1k req/day), Google account auth | Mode 4 |
-| Cursor AI with project rules + agent activation | Mode 5 |
-| Cline extension with path-conditional rules | Mode 6 |
-| Windsurf IDE with Cascade AI | Mode 7 |
-| Google Antigravity with native skill format | Mode 8 |
-
-## Architecture
-
-```
-YOU ←→ Manager (Haiku) ←→ Engineer (Sonnet)
-                        ←→ Security (Sonnet)
-                        ←→ Designer (Haiku)
-                        ←→ Researcher (Sonnet)
-                        ←→ Medic (Opus) [emergency]
-                        ←→ Consultant (Opus) [rare]
-```
-
-### Agents
-
-| Agent | Model | Role | Writes Code? |
-|-------|-------|------|-----------|
-| **Manager** | Haiku | Plans, delegates, coordinates, pushes | No |
-| **Engineer** | Sonnet | Implements features, fixes bugs, commits | Yes |
-| **Security** | Sonnet | Adversarial auditing, finds vulnerabilities | No |
-| **Designer** | Haiku | UI/UX review and design specs | No |
-| **Researcher** | Sonnet | Competitive analysis, market research, feature gaps | No || **Medic** | Opus | Emergency incident response, autonomous fix+deploy | Yes || **Consultant** | Opus | Deep architectural reasoning | No |
-
-### Workflow
-
-**Autonomous mode (v2.0 default — VS Code Feb 2026+ or Claude Code CLI)**:
-1. **You → Manager**: Paste PRD, answer clarifying questions, approve the plan
-2. **Manager**: Spawns Engineer, Security, and other agents automatically as subagents
-3. **Manager**: Reports final result when complete or surfaces blockers to you
-
-**Manual mode (backward compatible — any VS Code version)**:
-1. **You → Manager**: Describe what you want
-2. **Manager**: Plans the work, writes a handoff to `.agents/handoff.md`
-3. **Manager → You**: "Copy `.agents/handoff.md` to @engineer using Sonnet"
-4. **You → Engineer**: Paste the handoff, Engineer implements & commits
-5. **You → Manager**: Report completion, continue to next task
-6. **Before push**: Manager generates security review → You send to Security agent
-7. **Security**: Reports findings → Engineer fixes → repeat until clean
-8. **Manager**: Pushes to repo
-
-### Complex Project Mode
-
-**Requirements**: 3+ modules in your PRD AND Claude Code CLI available.
-
-**What it does:**
-- **Module registry** — tracks status, owner, and dependencies for every functional area across sessions
-- **Context routing** — routes ≤3-file tasks to Copilot (160k context), 10+-file or multi-module tasks to Claude Code CLI (1M context) automatically
-- **Dependency ordering** — identifies which modules can be built in parallel vs must be sequential
-- **Cross-session continuity** — MODULES.md persists so you never lose track across a 3-month build
-
-```powershell
-# After /init-project generates MODULES.md:
-/list-modules    # Status table: done / in-progress / blocked / design
-/show-graph      # ASCII dependency graph + critical path + parallel build plan
-```
-
-### Handoff Flow (solving the copy-paste problem)
-
-Instead of copying full prompts, agents write to `.agents/handoff.md` and you use the `/handoff-to-*` prompts:
-
-- `/handoff-to-engineer` — Sends current handoff to Engineer
-- `/handoff-to-security` — Sends current handoff to Security
-- `/handoff-to-designer` — Sends current handoff to Designer
-- `/handoff-to-consultant` — Sends current handoff to Consultant
-
-### Vibe Mode (Compact Reporting)
-
-For rapid iteration projects, reduce context usage by ~20%:
-
-In the handoff, add:
-```
-vibe_mode: true
-```
-
-Engineer will suppress all intermediate explanations and only report final result:
-```
-✅ COMPLETE | Commit: [hash]
-Files changed: [count]
-Tests: [count] passed
-```
-
-Use when you just want the end result, not step-by-step narration of the work.
-
-### State Files
-
-| File | Purpose | Updated By |
-|------|---------|-----------|
-| `.agents/state.json` | Machine-readable project state | All agents |
-| `.agents/state.md` | Human-readable dashboard | All agents |
-| `.agents/workspace-map.md` | Directory structure reference | Engineer, Manager |
-| `.agents/handoff.md` | Current inter-agent prompt | Sending agent |
-
-### Skills
-
-**Engineering core**
-
-| Skill | Purpose |
-|-------|----------|
-| `code-review` | On-demand code review checklist |
-| `security-audit` | OWASP Top 10 security audit checklist |
-| `tdd` | TDD workflow enforcing RED → GREEN → REFACTOR |
-| `quality-gate` | Pre-push gate: lint + type-check + test + security scan |
-| `caveman` | Token compression (65–75% output reduction). Three levels: lite / full / ultra. Activate when context window is filling up or on long sessions. |
-| `update-workspace-map` | Auto-regenerate `.agents/workspace-map.md` post-commit |
-| `supply-chain` | Standalone 4-gate supply chain security (submittable to [awesome-copilot](https://github.com/github/awesome-copilot)) |
-| `sbom` | Native SBOM generation via syft/cdxgen + CVE scan via osv-scanner |
-| `incident-response` | Emergency runbooks: triage, diagnosis, rollback vs patch, incident logs, postmortems |
-| `karpathy-guidelines` | Behavioural anti-pitfalls derived from Andrej Karpathy's LLM coding observations |
-| `llm-wiki` | Karpathy's persistent knowledge-base pattern: `wiki/` + `raw/` + Obsidian/markitdown integration |
-
-**Alignment & design discipline** _(adapted from [mattpocock/skills](https://github.com/mattpocock/skills))_
-
-| Skill | Purpose |
-|-------|----------|
-| `grill-me` | Relentless interview to align on a plan before any code is written. Walks the decision tree one question at a time. |
-| `grill-with-docs` | Same loop as `grill-me`, but updates `CONTEXT.md` (shared domain glossary) and `docs/adr/` (architecture decisions) inline as terms get resolved. The single highest-leverage alignment skill — turns the agent's vague language into the project's vocabulary. |
-| `diagnose` | Disciplined 6-phase bug loop: feedback loop → reproduce → hypothesise (3–5 ranked) → instrument → fix + regression test → cleanup + postmortem. |
-| `zoom-out` | Tell the agent to go up a layer and map the relevant modules + callers when you're unfamiliar with a section of code. |
-| `to-prd` | Synthesize the current conversation into a PRD and publish it as a GitHub Issue with the `ready-for-agent` label. Complements `/prd-builder` (which is Socratic from scratch). |
-| `to-issues` | Break a plan, spec, or PRD into independently-grabbable GitHub Issues using **tracer-bullet vertical slices** (full-stack thin paths, not horizontal layer-by-layer). |
-| `improve-codebase-architecture` | Surface deepening opportunities — shallow modules to consolidate, missing seams to introduce. Uses the `LANGUAGE.md` vocabulary (module / interface / seam / adapter / depth) consistently across suggestions. |
-| `prototype` | Build a throwaway prototype to answer a specific question. Routes to a terminal TUI (for state/logic questions) or N radically different UI variants on a single route (for design questions). |
-
-**Marketing pack** — _opt-in, not auto-loaded_
-
-33 marketing skills (`ab-test-setup`, `paid-ads`, `pricing-strategy`, `seo-audit`, `email-sequence`, etc.) live under `packs/marketing/skills/` rather than `.github/skills/` so they don't pollute agent context on coding projects.
-
-To enable them in a project:
-
-- **CLI**: `npx create-attacca <dir> --pack=marketing` (or pick "Marketing" / "All" in the interactive prompt)
-- **Template clone**: copy the subset you want from `packs/marketing/skills/<name>/` into `.github/skills/<name>/`, then run `node scripts/sync-skills.mjs` to mirror into `.claude/skills/`
-
-Full list in [`cli/bin/index.js`](cli/bin/index.js) under `SKILL_PACKS.marketing`.
-
-### Skill source-of-truth & sync
-
-`.github/skills/` is the canonical source. `.claude/skills/` is a byte-identical mirror generated by `scripts/sync-skills.mjs`. `claude-plugin/skills/` is intentionally different (self-contained plugin variants) and stays manual.
-
-```bash
-node scripts/sync-skills.mjs           # add/update only (safe)
-node scripts/sync-skills.mjs --prune   # also remove skills in .claude/skills/ no longer in source
-node scripts/sync-skills.mjs --check   # CI mode — exit non-zero on drift
-```
-
-### Companion Tools
-
-These tools work alongside Attacca but are not bundled — install them per-project when relevant.
-
-| Tool | Install | Use when |
-|------|---------|----------|
-| **[impeccable](https://github.com/pbakaus/impeccable)** | `cp -r dist/claude-code/.claude your-project/` | Any frontend project. 23 design commands (`/impeccable audit`, `/impeccable polish`, etc.), 27 anti-slop rules, 7 domain reference files. Pairs with the Designer agent. |
-| **[designlang](https://github.com/Manavarya09/design-extract)** | `npx designlang <url>` | User says "make it look like X". Extracts full design system from any live URL — DTCG tokens, Tailwind theme, component anatomy, brand voice. Feed output to Designer agent. |
-| **[codeburn](https://github.com/getagentseal/codeburn)** | `npm install -g codeburn` | Cost observability. Tracks token spend across 18 AI tools (Claude Code, Codex, Cursor, Copilot, Gemini CLI…). `codeburn optimize` flags waste in your `~/.claude/` setup. |
-| **[agentmemory](https://github.com/rohitg00/agentmemory)** | `npm install -g @agentmemory/agentmemory` + `agentmemory connect <agent>` | Persistent cross-session memory for any MCP-speaking agent (Cursor, Claude Code, Codex, Gemini CLI, Cline, Windsurf, etc.). Captures tool use via hooks, exposes 51 MCP tools. **Heavyweight** — runs a background server + `iii-engine` native binary (or Docker on Windows). Use when project context legitimately can't fit in `CONTEXT.md` + `.agents/state.json`. For most projects the in-repo files are simpler and cheaper. |
-
-## Supply Chain Security
-
-**Engineer cannot add arbitrary packages.** We use defense-in-depth to prevent malware/typosquats from reaching production:
-
-```
-Gate 1: Handoff         →  Manager approves dependencies before handoff
-        Constraint       →  Engineer forbidden from adding unapproved packages
-        
-Gate 2: Pre-Review      →  /review-dependencies vets packages (typosquats, abandoned, trust)
-        
-Gate 3: Quality Gate    →  Lint + Type + Test + Dependency Audit (direct + transitive)
-        
-Gate 4: Security Audit  →  @security agent reviews SBOM, maintainers, lock files
-        (Mandatory       →  Required before ANY push with dependency changes
-         on changes)
-```
-
-**Workflow**:
-1. **Task needs a package?** Manager calls `/review-dependencies` first — vets typosquats, maintainers, CVEs
-2. **Approved?** Added to handoff; Engineer implements with it locked
-3. **Engineer finishes?** Quality gate runs — catches HIGH/CRITICAL vulns
-4. **Dependencies changed?** Security agent MUST review before push — full SBOM generation
-5. **Passed all checks?** Safe to ship
-
-See [Security Agent](Security.agent.md) for full dependency review process.
-
-
-
-| Prompt | Purpose |
-|--------|----------|
-| `/quickstart` | Interactive onboarding for first-time users (start here!) |
-| `/prd-builder` | Build a comprehensive PRD from scratch using Socratic questioning |
-| `/init-project` | PRD intake (file, paste, or idea), full scaffolding, research, GitHub Issues, Context7 MCP |
-| `/mvp` | Max velocity mode: aggressive parallelization, deferred gates, scope razor, parallel Engineer sessions |
-| `/review-dependencies` | Pre-handoff dependency vetting (supply chain security) |
-| `/remember-handoff` | Write handoff to Copilot Memory — next agent reads it automatically |
-| `/retrofit` | Retrofit existing projects (VS Code, JetBrains, Eclipse, Xcode) |
-| `/handoff-to-engineer` | Trigger handoff to Engineer agent |
-| `/handoff-to-security` | Trigger handoff to Security agent |
-| `/handoff-to-designer` | Trigger handoff to Designer agent |
-| `/handoff-to-consultant` | Trigger handoff to Consultant agent |
-| `/handoff-to-researcher` | Trigger handoff to Researcher agent |
-| `/learn` | Extract session patterns into `copilot-instructions.md` + Copilot Memory |
-| `/meta` | Answer framework meta questions (agents, tools, skills, workflow) |
-| `/git` | Query GitHub repo state (issues, PRs, commits, workflows, branches) |
-| `/hotfix` | Emergency production incident response via Medic agent |
-| `/setup-budget` | Reconfigure your tools and budget (run after `/init-project` if you want to change settings) |
-| `/list-modules` | Status table of all project modules: complete/in-progress/blocked (complex projects) |
-| `/show-graph` | ASCII dependency graph with build order and critical path (complex projects) |
-
-## Package Age Policy
-
-**All new dependencies must be ≥30 days old** to allow time for vulnerabilities to surface and be patched.
-
-- **Exception**: Security patches (Z-version bumps, e.g., 1.2.5 → 1.2.6) can be applied immediately if all tests pass
-- **Enforced by**: `/review-dependencies` (Manager), quality gate, and `@security` agent
-
-## Retrofitting Existing Projects
-
-Already have a project? Use `/retrofit` to add agents **without disrupting existing code**:
-
-```bash
-@manager: /retrofit
-```
-
-Manager detects your IDE (VS Code, JetBrains, Eclipse, Xcode), audits your project, and generates a customized retrofit plan. The `.agent.md` format is cross-IDE — one boilerplate works everywhere.
-
-See [RETROFIT.md](RETROFIT.md) for full migration guide.
-
-## For New Projects
-
-This template uses a **two-gitignore strategy**:
-
-| File | Purpose |
-|------|---------|
-| `.gitignore` | Template version — commits all agent files so GitHub has the full boilerplate |
-| `.gitignore.project` | Project version — excludes agent orchestration files from project repos |
-
-After cloning for a new project, rename `.gitignore.project` → `.gitignore`. This keeps your project repo clean (just code), while the template repo stays complete on GitHub.
-
-The Manager will add project-specific MCPs, skills, and instructions based on your PRD during `/init-project`.
-
-## Requirements
-
-- VS Code (or JetBrains / Eclipse / Xcode) with GitHub Copilot
-- Claude models enabled (Haiku, Sonnet, Opus)
-- Context7 MCP — auto-configured by `/init-project` based on your stack
-- GitHub CLI (`gh`) — required for GitHub Issues task backlog
-- `syft` or `cdxgen` — required for SBOM generation (installed automatically by `sbom` skill if missing)
+`v4.0.0` — see [CHANGELOG.md](CHANGELOG.md). v3.11.2 (the multi-tool boilerplate era) is preserved at tag `v3.11.2-final`.
 
 ---
+
 *Built with [Attacca](https://github.com/adihebbalae/Attacca)*

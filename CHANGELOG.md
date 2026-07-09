@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-07-08
+
+### BREAKING — full redesign: boilerplate → plugin marketplace
+
+v3's clone-a-template model, Manager/Engineer persona orchestration, `.agents/` state machine, and 8-tool port matrix are retired. v3 is preserved on branch `legacy/v3` (tag `v3.11.2-final`). Migration guide: `docs/MIGRATION-v3-to-v4.md`.
+
+### Added
+- **Three Claude Code plugins** installed via `/plugin marketplace add adihebbalae/Attacca`:
+  - `attacca-core` — 17 workflow skills (incl. new `wrap-session`, `bdr-commit`), `critic` + `researcher` subagents, read-once + auto-lint hooks (hooks ported to cross-platform Node, with per-session cache fix and mtime invalidation).
+  - `attacca-security` — security-audit / supply-chain / sbom skills, isolated-context `security-auditor` subagent (file paths only — anti-bias rule preserved), and an `audit-gate` hook that blocks `git push` without a fresh `VERDICT: CLEAN` report at `.attacca/audits/latest.md`.
+  - `attacca-init` — new flagship `/interrogate` skill (9-domain disambiguation of vague build requests → CONTEXT.md spec), plus init-project, retrofit, mvp, quickstart.
+- **`template/`** — the entire per-project footprint: CLAUDE.md (<50 lines), AGENTS.md (cross-tool standard), CONTEXT.md skeleton, settings.json.
+- **`CONTEXT.md` convention** — thin committed orientation file replacing state.json/state.md/workspace-map (schema: `docs/CONTEXT-SCHEMA.md`).
+- **`docs/`** — PLUGIN-ARCHITECTURE, CONTEXT-SCHEMA, MIGRATION-v3-to-v4, DESIGN-DECISIONS (the context/verification razor).
+- **`scripts/validate-plugins.mjs`** — manifest/version consistency + dead-reference checks.
+
+### Removed
+- `.agents/` orchestration (state.json, handoff.md, workspace-map.md, MODULES.md, rules, workflows, templates), persona agent definitions, `.cursor/`, `.clinerules/`, `.windsurfrules`, `.gemini/`, `GEMINI.md`, `ANTIGRAVITY.md`, Copilot agents/prompts/instructions/skills, old `claude-plugin/` monolith, `addons/` + `packs/`, process skills (parallelize, audit-prs, auto-run, update-workspace-map, prd-builder → superseded by interrogate, update-boilerplate → superseded by plugin updates), v3 scripts, `DESIGN.md`, `RETROFIT.md` (→ `/retrofit` skill + docs).
+
+### Why
+July 2026 research (Claude Code feature evolution, competitor landscape, community best practices): native subagents/plan-mode/memory/plugins absorbed v3's orchestration layer; persona hierarchies and clone-a-boilerplate are documented anti-patterns; 5 of 8 ported tools are dead or fading; AGENTS.md covers the rest. What survives is what models can't replace: context (interrogation frameworks, decisions) and verification (the push gate). Full rationale: `docs/DESIGN-DECISIONS.md`.
+
 ## [3.11.2] - 2026-05-19
 
 ### Changed

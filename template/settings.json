@@ -1,0 +1,11 @@
+{
+  "model": "sonnet",
+  "enabledPlugins": {
+    "attacca-core@attacca": true,
+    "attacca-security@attacca": true,
+    "attacca-init@attacca": true
+  },
+  "env": {
+    "CLAUDE_CODE_SUBAGENT_MODEL": "sonnet"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "attacca-security",
+  "description": "Attacca security gate for Claude Code: OWASP-based security audit, supply-chain defense, SBOM generation, an isolated-context security-auditor subagent (receives file paths only — no implementation details), and a pre-push hook that blocks git push until a fresh clean audit exists.",
+  "version": "4.0.0",
+  "author": { "name": "adihebbalae" },
+  "homepage": "https://github.com/adihebbalae/Attacca",
+  "repository": "https://github.com/adihebbalae/Attacca",
+  "license": "MIT",
+  "keywords": ["security", "audit", "supply-chain", "sbom", "owasp", "push-gate"]
+}
