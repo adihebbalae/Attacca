@@ -13,12 +13,12 @@ description: "Runbooks and decision frameworks for production incidents and emer
 
 Use this framework to classify severity and choose response strategy.
 
-| Severity | Impact | Response Time | Who | Escalation |
-|----------|--------|---------------|-----|------------|
-| **SEV 1 (Critical)** | Service fully down, data loss risk, security breach | < 15 min | Medic agent (opus) | Immediate |
-| **SEV 2 (High)** | Degraded service, non-critical feature broken | < 2 hours | Engineer agent (sonnet) | If not fixed in 4h |
-| **SEV 3 (Medium)** | Minor bug, workaround exists | < 1 day | Engineer agent (sonnet) | If user-facing |
-| **SEV 4 (Low)** | Cosmetic, no user impact | Next sprint | Engineer agent (sonnet) | None |
+| Severity | Impact | Response Time | Model tier | Escalation |
+|----------|--------|---------------|-----------|------------|
+| **SEV 1 (Critical)** | Service fully down, data loss risk, security breach | < 15 min | opus | Immediate |
+| **SEV 2 (High)** | Degraded service, non-critical feature broken | < 2 hours | sonnet | If not fixed in 4h |
+| **SEV 3 (Medium)** | Minor bug, workaround exists | < 1 day | sonnet | If user-facing |
+| **SEV 4 (Low)** | Cosmetic, no user impact | Next sprint | haiku | None |
 
 **SEV 1 gets priority response.** SEV 2-4 follow standard incident process.
 

@@ -7,13 +7,13 @@ description: "Token compression skill. Use when: context window is filling up, o
 
 # Caveman Skill — Token Compression
 
-Compress agent output to reduce token spend without losing meaning. Use whenever context pressure is building or the Manager calls for compression mode.
+Compress agent output to reduce token spend without losing meaning. Use whenever context pressure is building or compression mode is called for.
 
 ---
 
 ## When to Activate
 
-- Manager says "caveman", "compress", or "token-saving mode"
+- User says "caveman", "compress", or "token-saving mode"
 - Context window is approaching 60%+ utilization
 - Task has many remaining steps and you need to preserve context budget
 - User explicitly asks for brief/terse responses

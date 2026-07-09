@@ -11,7 +11,7 @@ description: "Pre-push quality gate checklist. Use when: before any git push, be
 - Before every `git push` (mandatory)
 - Before opening or merging a PR
 - After implementing a complete feature
-- When Manager explicitly says "run quality gate"
+- When the user runs `/quality-gate`
 - As the final step before any deployment
 
 This gate answers one question: **Is this code safe to ship?**

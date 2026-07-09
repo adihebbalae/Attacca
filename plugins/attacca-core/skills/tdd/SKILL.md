@@ -149,9 +149,9 @@ src/
 
 ---
 
-## Self-Test Loop (Engineer Must Follow)
+## Self-Test Loop
 
-Before reporting back to Manager:
+Before reporting the work complete:
 1. Run full test suite
 2. If any test fails → fix → re-run
 3. Repeat until 100% green
