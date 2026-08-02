@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.0] - 2026-08-01
+
+### Added
+- **`attacca-init` / `validate-idea` skill** — falsification-first product/feature idea validation: decomposes an idea into load-bearing assumptions, pre-registers kill criteria before gathering evidence, runs cost-ordered disqualifiers, keeps a cited evidence ledger, red-teams the idea in an independent context, and issues a traceable verdict with one concrete next experiment.
+
 ## [4.0.0] - 2026-07-08
 
 ### BREAKING — full redesign: boilerplate → plugin marketplace

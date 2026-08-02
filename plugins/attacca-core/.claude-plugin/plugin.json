@@ -1,7 +1,7 @@
 {
   "name": "attacca-core",
   "description": "Attacca workflow skills for Claude Code: diagnose, TDD, code review, quality gate, prototyping, architecture deepening, grill-me interrogation of plans, session wrap-up (CONTEXT.md), and BDR commit style. Plus fresh-context reviewer and researcher subagents, and token-saving hooks.",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "author": { "name": "adihebbalae" },
   "homepage": "https://github.com/adihebbalae/Attacca",
   "repository": "https://github.com/adihebbalae/Attacca",
