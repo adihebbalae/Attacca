@@ -1,0 +1,898 @@
+---
+const GITHUB_URL = "https://github.com/adihebbalae/Attacca";
+const BRANCH = "master";
+
+const plugins = [
+  {
+    name: "attacca-core",
+    tagline: "Workflow skills",
+    desc: "diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, and more. Plus critic + researcher subagents, and token-saving hooks.",
+    icon: "◈",
+  },
+  {
+    name: "attacca-security",
+    tagline: "Audit gate",
+    desc: "OWASP security-audit, supply-chain, and SBOM skills. An isolated-context security-auditor subagent, and a hook that blocks git push until a fresh clean audit exists.",
+    icon: "⟁",
+  },
+  {
+    name: "attacca-init",
+    tagline: "Project intake",
+    desc: "/interrogate turns a vague build request into a committed CONTEXT.md spec. Plus init-project, retrofit, validate-idea, and mvp.",
+    icon: "◻",
+  },
+];
+
+// Real skill descriptions, condensed from each plugin's SKILL.md frontmatter.
+// `reply` is a plausible one-line simulation of the agent kicking the skill off — not real output.
+const SKILLS = [
+  { cmd: "bdr-commit", plugin: "attacca-core", desc: "BDR commit discipline: Business/Decision/Rationale format making every commit auditable and falsifiable. Never adds Co-Authored-By or AI attribution.", reply: "Drafting a BDR commit — Business, Decision, Rationale. Which one do you want to start with?" },
+  { cmd: "caveman", plugin: "attacca-core", desc: "Token compression. Reduces output tokens 65-75% by switching to telegraphic prose. Use when context is filling up or responses need to be faster and cheaper.", reply: "switching to telegraphic prose. tokens down ~70%. what's the task?" },
+  { cmd: "code-review", plugin: "attacca-core", desc: "On-demand code review checklist covering readability, correctness, performance, security, and maintainability.", reply: "Scanning the diff for readability, correctness, security, and maintainability. Found a few things worth a look — want the list?" },
+  { cmd: "diagnose", plugin: "attacca-core", desc: "Disciplined diagnosis loop for hard bugs and performance regressions: reproduce, minimise, hypothesise, instrument, fix, regression-test.", reply: "Let's reproduce it first. Paste the exact steps or command that triggers it." },
+  { cmd: "grill-me", plugin: "attacca-core", desc: "Interviews you relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree.", reply: "Walk me through the plan. I'm going to poke every assumption until it survives or breaks." },
+  { cmd: "grill-with-docs", plugin: "attacca-core", desc: "A grilling session that challenges your plan against the existing domain model and updates CONTEXT.md / ADRs inline as decisions crystallise.", reply: "Pulling up CONTEXT.md and your ADRs. Let's see where this plan disagrees with what you've already decided." },
+  { cmd: "improve-codebase-architecture", plugin: "attacca-core", desc: "Finds deepening opportunities in a codebase, informed by CONTEXT.md and prior ADRs — refactor targets, tightly-coupled modules, testability gaps.", reply: "Scanning for tightly-coupled modules and refactor targets, cross-referenced against CONTEXT.md. One sec." },
+  { cmd: "incident-response", plugin: "attacca-core", desc: "Runbooks for production incidents: triage, classification, symptom-to-fix matching, and incident logging. For SEV-level emergencies.", reply: "What's the severity — service down, data loss risk, or security breach? I'll pull the right runbook." },
+  { cmd: "karpathy-guidelines", plugin: "attacca-core", desc: "Behavioral guidelines to reduce common LLM coding mistakes — avoiding overcomplication, making surgical changes, defining verifiable success criteria.", reply: "Checking this against common LLM coding pitfalls — overcomplication, non-surgical changes, unverifiable success criteria." },
+  { cmd: "llm-wiki", plugin: "attacca-core", desc: "Builds and maintains a persistent, compounding LLM-maintained knowledge base from PDFs, articles, and notes — queryable with citations.", reply: "Add something to the wiki, query it, or run a health check for gaps and contradictions — which one?" },
+  { cmd: "prototype", plugin: "attacca-core", desc: "Builds a throwaway prototype before committing to a design — a runnable app for logic questions, or several toggleable UI variations for design exploration.", reply: "Terminal app or a few clickable UI variations — which flushes out this design faster?" },
+  { cmd: "quality-gate", plugin: "attacca-core", desc: "Pre-push quality gate: lint, type-check, tests, and a security scan as one sequential gate. Fails fast — never proceeds past a failing stage.", reply: "Running lint, type-check, tests, then a security scan — sequential, fails fast. Starting now." },
+  { cmd: "tdd", plugin: "attacca-core", desc: "Enforces RED then GREEN then REFACTOR. Prevents writing implementation before a failing test exists.", reply: "Write the failing test first. What's the behavior you're implementing?" },
+  { cmd: "to-issues", plugin: "attacca-core", desc: "Breaks a plan, spec, or PRD into independently-grabbable issues using tracer-bullet vertical slices.", reply: "Breaking this into tracer-bullet vertical slices. How many independently-shippable pieces do you want?" },
+  { cmd: "to-prd", plugin: "attacca-core", desc: "Turns the current conversation context into a PRD and publishes it as a GitHub Issue.", reply: "Turning this conversation into a PRD and opening it as a GitHub Issue. Confirm the repo?" },
+  { cmd: "wrap-session", plugin: "attacca-core", desc: "Session bookmark. Updates CONTEXT.md for seamless continuation next session. Triggers on 'wrap up' or 'done for today'.", reply: "Updating CONTEXT.md with what changed this session. Anything future-you should know that isn't in the diff?" },
+  { cmd: "zoom-out", plugin: "attacca-core", desc: "Zooms out to give broader context or a higher-level perspective on unfamiliar code.", reply: "Here's the bigger picture this code sits inside — want the module map or the data flow?" },
+  { cmd: "security-audit", plugin: "attacca-security", desc: "On-demand OWASP Top 10 audit. Reports written to .attacca/audits/latest.md with a verdict that unlocks the push gate. Use before any git push.", reply: "Running the OWASP Top 10 checklist against this diff. I'll write the verdict to .attacca/audits/latest.md." },
+  { cmd: "supply-chain", plugin: "attacca-security", desc: "4-gate supply chain security checklist preventing malicious packages, typosquatting, and abandoned projects. Use before adding any dependency to production.", reply: "Checking this dependency against 4 gates: maintainer trust, typosquatting, abandonment, known CVEs." },
+  { cmd: "sbom", plugin: "attacca-security", desc: "Generates a Software Bill of Materials and scans it for CVEs. Artifacts written to .attacca/sbom/.", reply: "Generating the SBOM and scanning it for CVEs now. Writing it to .attacca/sbom/." },
+  { cmd: "interrogate", plugin: "attacca-init", desc: "Disambiguates vague build requests ('build me a webstore with stripe and auth') into structured questions and a committed CONTEXT.md.", reply: "A few things are unresolved here — auth, payments, data, hosting. Let's nail those down before anything gets built." },
+  { cmd: "validate-idea", plugin: "attacca-init", desc: "Falsification-first idea validation: decomposes an idea into load-bearing assumptions, pre-registers kill criteria before gathering evidence, red-teams it, and issues a traceable verdict.", reply: "Before we validate this — what's the one fact that, if false, kills the idea entirely?" },
+  { cmd: "init-project", plugin: "attacca-init", desc: "Initializes a new project from CONTEXT.md — scaffolds directories, .gitignore, basic configs, and commits.", reply: "Reading CONTEXT.md for the spec — or if it's not there yet, I've got five quick questions." },
+  { cmd: "retrofit", plugin: "attacca-init", desc: "Retrofits an existing project with Attacca — audits structure, generates CONTEXT.md from what it finds. Never touches source code or deployments.", reply: "Auditing your existing structure first. I won't touch source code or deployments — just mapping what's here." },
+  { cmd: "mvp", plugin: "attacca-init", desc: "Ships a working MVP as fast as possible — ruthless scope, aggressive defaults, skips non-essential gates.", reply: "Ruthless scope, aggressive defaults. What's the one feature that has to work for this to count as done?" },
+  { cmd: "quickstart", plugin: "attacca-init", desc: "Welcome guide for new users — assesses your setup, explains what Attacca does, points to the first action.", reply: "Let's see what's already set up here — give me a second to look around." },
+];
+
+const FEATURED = ["interrogate", "validate-idea", "tdd", "quality-gate", "security-audit", "wrap-session"];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Attacca — Build without pause.</title>
+  <meta name="description" content="A context-engineering toolkit for Claude Code. Three plugins that add what the model can't provide for itself: the questions your project needs answered before building, and the gates it can't skip before shipping." />
+  <meta property="og:title" content="Attacca — Build without pause." />
+  <meta property="og:description" content="A context-engineering toolkit for Claude Code. Three plugins that add what the model can't provide for itself: the questions your project needs answered before building, and the gates it can't skip before shipping." />
+  <meta property="og:type" content="website" />
+  <link rel="icon" type="image/svg+xml" href="/Attacca/favicon.svg" />
+  <style is:global>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #07080f;
+      --surface:   #0f1117;
+      --surface2:  #161822;
+      --border:    rgba(255,255,255,0.07);
+      --border2:   rgba(255,255,255,0.12);
+      --accent:    #6ee7b7;
+      --accent2:   #a78bfa;
+      --text:      #e2e8f0;
+      --muted:     #8892a4;
+      --code-bg:   #0d1117;
+      --radius:    10px;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ─── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 56px;
+      background: rgba(7,8,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: -0.01em;
+    }
+    .nav-logo span { color: var(--muted); font-weight: 400; margin-left: 6px; font-size: 0.85rem; }
+
+    .nav-actions { display: flex; gap: 0.75rem; align-items: center; }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      color: var(--text);
+      background: transparent;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(110,231,183,0.06); }
+
+    /* ─── LAYOUT ──────────────────────────────────────────── */
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+    section { padding: 6rem 0; }
+    section + section { border-top: 1px solid var(--border); }
+
+    /* ─── HERO ────────────────────────────────────────────── */
+    .hero {
+      padding: 7rem 0 5rem;
+      text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border: 1px solid rgba(110,231,183,0.25);
+      border-radius: 100px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      background: rgba(110,231,183,0.06);
+      margin-bottom: 2rem;
+    }
+    .hero-badge::before { content: '⚡'; }
+
+    h1 {
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      color: #fff;
+      margin-bottom: 1.5rem;
+    }
+    h1 .accent { color: var(--accent); }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.6;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 4rem;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--accent);
+      color: #050a0e;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); background: rgba(110,231,183,0.06); }
+
+    /* install terminal */
+    .install-preview {
+      display: inline-block;
+      background: var(--code-bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.75rem;
+      text-align: left;
+      max-width: 600px;
+      width: 100%;
+    }
+    .install-preview-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #ffbd2e; }
+    .dot-g { background: #28c840; }
+
+    .install-line {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+    .install-line .prompt { color: var(--accent); margin-right: 8px; }
+    .install-line .cmd { color: var(--text); }
+    .install-line .comment { color: #3d4f5e; }
+    .install-line.output { color: #3d7a5e; padding-left: 1.4rem; }
+
+    /* ─── SECTION HEADERS ─────────────────────────────────── */
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-label {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+    .section-sub { color: var(--muted); max-width: 520px; margin: 0 auto; }
+
+    /* ─── PLUGINS ─────────────────────────────────────────── */
+    .plugins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .plugin-card {
+      background: var(--surface);
+      padding: 1.75rem;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .plugin-card:hover { background: var(--surface2); }
+    .plugin-card:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    .plugin-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+      font-family: var(--font-mono);
+    }
+    .plugin-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.15rem;
+      font-family: var(--font-mono);
+    }
+    .plugin-tagline {
+      font-size: 0.78rem;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      font-family: var(--font-mono);
+    }
+    .plugin-desc { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
+    .plugin-hint {
+      font-size: 0.72rem;
+      color: var(--accent2);
+      margin-top: 0.9rem;
+      font-family: var(--font-mono);
+    }
+
+    /* ─── HOW IT WORKS ────────────────────────────────────── */
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2rem; }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .step-num {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+    }
+    .step h3 { font-size: 1.1rem; font-weight: 600; color: #fff; }
+    .step p { font-size: 0.9rem; color: var(--muted); line-height: 1.6; }
+    .step-code {
+      margin-top: 0.5rem;
+      background: var(--code-bg);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 0.6rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    /* ─── LIVE TERMINAL ───────────────────────────────────── */
+    .live-terminal {
+      background: var(--code-bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.75rem;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .term-output {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 0.9rem;
+    }
+    .term-line { color: var(--muted); white-space: pre-wrap; }
+    .term-line.cmd-echo { color: var(--text); margin-top: 0.6rem; }
+    .term-line.cmd-echo .prompt { color: var(--accent); margin-right: 8px; }
+    .term-line.resp { padding-left: 1.4rem; }
+    .term-line.plugin-tag { color: var(--accent2); padding-left: 1.4rem; }
+    .term-line.err { color: #f0a5a5; padding-left: 1.4rem; }
+    .term-line.hint { color: #3d4f5e; }
+    .term-line.agent { color: var(--accent2); padding-left: 1.4rem; margin-top: 0.35rem; }
+    .term-input-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid var(--border2);
+      padding-top: 0.85rem;
+    }
+    .term-input-row .prompt { color: var(--accent); font-family: var(--font-mono); }
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .term-suggest {
+      display: none;
+      position: absolute;
+      bottom: 100%;
+      left: 1.4rem;
+      right: 0;
+      margin-bottom: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      overflow: hidden;
+      z-index: 10;
+    }
+    .term-suggest.show { display: block; }
+    .term-suggest-item {
+      padding: 0.5rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .term-suggest-item:hover, .term-suggest-item.active { background: var(--surface); color: var(--accent); }
+
+    .chip-row { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 1.5rem; }
+    .chip {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent2);
+      border: 1px solid var(--border2);
+      border-radius: 100px;
+      padding: 5px 14px;
+      cursor: pointer;
+      background: rgba(167,139,250,0.06);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .chip:hover { border-color: var(--accent2); background: rgba(167,139,250,0.14); }
+
+    /* ─── MODAL ───────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4,5,10,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-panel {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      max-width: 560px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 1.75rem;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.1rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 1.4rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-title { font-family: var(--font-mono); font-size: 1.05rem; color: #fff; font-weight: 600; }
+    .modal-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 1.25rem; margin-top: 0.2rem; }
+    .modal-skill { padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .modal-skill:last-child { border-bottom: none; }
+    .modal-skill code { font-family: var(--font-mono); font-size: 0.82rem; color: var(--accent); }
+    .modal-skill p { font-size: 0.85rem; color: var(--muted); margin-top: 0.35rem; line-height: 1.55; }
+
+    /* ─── FOOTER ──────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo { font-family: var(--font-mono); font-size: 0.9rem; color: var(--accent); font-weight: 600; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { font-size: 0.85rem; color: var(--muted); transition: color 0.15s; }
+    .footer-links a:hover { color: var(--text); }
+    .built-with { font-size: 0.78rem; color: #3d4f5e; }
+    .built-with a { color: #3d4f5e; border-bottom: 1px solid transparent; transition: color 0.15s, border-color 0.15s; }
+    .built-with a:hover { color: var(--muted); border-color: var(--muted); }
+
+    /* ─── COPY TOAST ──────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--accent);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────── */
+    @media (max-width: 640px) {
+      nav { padding: 0 1rem; }
+      .container { padding: 0 1.25rem; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-logo">⚡ attacca <span>/ Claude Code plugin marketplace</span></div>
+  <div class="nav-actions">
+    <a href={GITHUB_URL} target="_blank" rel="noopener" class="btn-ghost">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Star on GitHub
+    </a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge">Claude Code Plugin Marketplace</div>
+    <h1>Build without<br/><span class="accent">pause.</span></h1>
+    <p class="hero-sub">
+      A context-engineering toolkit for Claude Code. Three plugins that add what the
+      model can't provide for itself: the questions your project needs answered
+      before building, and the gates it can't skip before shipping.
+    </p>
+    <div class="cta-group">
+      <button class="btn-primary" id="copy-install-btn" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy install command
+      </button>
+      <a href={GITHUB_URL} target="_blank" rel="noopener" class="btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        ★ Star on GitHub
+      </a>
+    </div>
+
+    <!-- static install walkthrough -->
+    <div class="install-preview">
+      <div class="install-preview-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+      </div>
+      <div class="install-line comment"># Add the Attacca marketplace</div>
+      <div class="install-line"><span class="prompt">›</span><span class="cmd">/plugin marketplace add adihebbalae/Attacca</span></div>
+      <div class="install-line output">✓ Marketplace "attacca" registered</div>
+      <div class="install-line">&nbsp;</div>
+      <div class="install-line comment"># Install the plugins you need</div>
+      <div class="install-line"><span class="prompt">›</span><span class="cmd">/plugin install attacca-core@attacca</span></div>
+      <div class="install-line"><span class="prompt">›</span><span class="cmd">/plugin install attacca-security@attacca</span></div>
+      <div class="install-line"><span class="prompt">›</span><span class="cmd">/plugin install attacca-init@attacca</span></div>
+      <div class="install-line output">✓ 3 plugins installed</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PLUGINS ───────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Three plugins</div>
+      <h2>Install only what you need.</h2>
+      <p class="section-sub">Each plugin works standalone — no shared runtime, no persona system, no state files to keep in sync. Click a card for the full skill list.</p>
+    </div>
+    <div class="plugins-grid">
+      {plugins.map(p => (
+        <div class="plugin-card" data-plugin={p.name} role="button" tabindex="0">
+          <div class="plugin-icon">{p.icon}</div>
+          <div class="plugin-name">{p.name}</div>
+          <div class="plugin-tagline">{p.tagline}</div>
+          <div class="plugin-desc">{p.desc}</div>
+          <div class="plugin-hint">→ view all skills</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ──────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Workflow</div>
+      <h2>Every artifact is context or verification.</h2>
+      <p class="section-sub">Nothing Attacca ships is process the model already knows how to do — see the design razor in the docs.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01 / DISAMBIGUATE</div>
+        <h3>Describe what you want to build</h3>
+        <p><code style="font-family:monospace;color:var(--accent)">/interrogate</code> fires on anything ambiguous — auth, payments, data, hosting, budget, non-goals — and writes the answers to a committed <code style="font-family:monospace;color:var(--accent)">CONTEXT.md</code>.</p>
+        <div class="step-code">/interrogate</div>
+      </div>
+      <div class="step">
+        <div class="step-num">02 / BUILD</div>
+        <h3>Work with gates, not checklists</h3>
+        <p>TDD, code review, and a quality gate run before every push. Security audits in an isolated context — it never sees commit messages.</p>
+        <div class="step-code">/quality-gate</div>
+      </div>
+      <div class="step">
+        <div class="step-num">03 / CONTINUE</div>
+        <h3>Every session picks up where the last left off</h3>
+        <p><code style="font-family:monospace;color:var(--accent)">CONTEXT.md</code> is the one file every future session, teammate, or cloud agent reads to orient.</p>
+        <div class="step-code">/wrap-session</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TRY IT ────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Try it</div>
+      <h2>Type a command, see what it does.</h2>
+      <p class="section-sub">A simulated agent responds in character. Keep talking and it'll point you to the real plugin — this all runs in your browser, nothing is sent anywhere.</p>
+    </div>
+    <div class="live-terminal">
+      <div class="term-output" id="term-output"></div>
+      <div class="term-input-row">
+        <div class="term-suggest" id="term-suggest"></div>
+        <span class="prompt">›</span>
+        <input class="term-input" id="term-input" type="text" placeholder="/tdd" autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+    <div class="chip-row">
+      {FEATURED.map(cmd => <button class="chip" data-cmd={cmd} type="button">/{cmd}</button>)}
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ────────────────────────────────────────────── -->
+<footer>
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;width:100%;">
+    <div class="footer-logo">⚡ attacca</div>
+    <div class="footer-links">
+      <a href={GITHUB_URL} target="_blank" rel="noopener">GitHub</a>
+      <a href={`${GITHUB_URL}/blob/${BRANCH}/README.md`} target="_blank" rel="noopener">Docs</a>
+      <a href={`${GITHUB_URL}/blob/${BRANCH}/CHANGELOG.md`} target="_blank" rel="noopener">Changelog</a>
+    </div>
+    <p class="built-with">Built with <a href={GITHUB_URL} target="_blank" rel="noopener">Attacca</a></p>
+  </div>
+</footer>
+
+<!-- ─── MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" id="skill-modal">
+  <div class="modal-panel">
+    <button class="modal-close" id="modal-close" type="button" aria-label="Close">×</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-sub" id="modal-sub"></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─────────────────────────────────────────────── -->
+<div id="toast">Copied to clipboard</div>
+
+<script type="application/json" id="skills-data" set:html={JSON.stringify(SKILLS)}></script>
+
+<script>
+  const skillsData = JSON.parse(document.getElementById('skills-data').textContent);
+  const skillsByCmd = {};
+  skillsData.forEach((s) => { skillsByCmd[s.cmd] = s; });
+
+  function copyInstall() {
+    const cmd = [
+      '/plugin marketplace add adihebbalae/Attacca',
+      '/plugin install attacca-core@attacca',
+      '/plugin install attacca-security@attacca',
+      '/plugin install attacca-init@attacca',
+    ].join('\n');
+
+    navigator.clipboard.writeText(cmd).then(() => {
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2200);
+    });
+  }
+  document.getElementById('copy-install-btn').addEventListener('click', copyInstall);
+
+  // ── Live terminal ──────────────────────────────────────
+  const output = document.getElementById('term-output');
+  const input = document.getElementById('term-input');
+  const suggestBox = document.getElementById('term-suggest');
+  const history = [];
+  let historyIdx = -1;
+  let activeSuggestIdx = -1;
+  let lastSkill = null;
+
+  function appendLine(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'term-line ' + (cls || '');
+    div.textContent = text;
+    output.appendChild(div);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function appendEcho(text) {
+    const div = document.createElement('div');
+    div.className = 'term-line cmd-echo';
+    const prompt = document.createElement('span');
+    prompt.className = 'prompt';
+    prompt.textContent = '›';
+    div.appendChild(prompt);
+    div.appendChild(document.createTextNode(text));
+    output.appendChild(div);
+    output.scrollTop = output.scrollHeight;
+  }
+
+  function appendAgent(text) {
+    appendLine('◈ agent  ' + text, 'agent');
+  }
+
+  function runCommand(raw) {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+    appendEcho(trimmed);
+    history.push(trimmed);
+    historyIdx = history.length;
+
+    const name = trimmed.replace(/^\//, '').toLowerCase();
+
+    if (name === 'clear') {
+      output.innerHTML = '';
+      lastSkill = null;
+      return;
+    }
+    if (name === 'help') {
+      appendLine('All commands:', 'resp');
+      skillsData.forEach((s) => appendLine('  /' + s.cmd + '  [' + s.plugin + ']', 'resp'));
+      return;
+    }
+
+    const skill = skillsByCmd[name];
+    if (skill) {
+      appendLine('[' + skill.plugin + ']', 'resp plugin-tag');
+      appendLine(skill.desc, 'resp');
+      appendAgent(skill.reply);
+      lastSkill = skill;
+      return;
+    }
+
+    // Not a recognized command. If an agent is "mid-conversation", redirect to install.
+    if (lastSkill) {
+      appendAgent(
+        "that's as far as the preview goes — the real /" + lastSkill.cmd + " runs inside your own codebase. install " + lastSkill.plugin + ":\n" +
+        "  /plugin marketplace add adihebbalae/Attacca\n" +
+        "  /plugin install " + lastSkill.plugin + "@attacca"
+      );
+      return;
+    }
+
+    const matches = Object.keys(skillsByCmd).filter((c) => c.includes(name));
+    if (matches.length) {
+      appendLine('Unknown command. Did you mean: ' + matches.slice(0, 4).map((m) => '/' + m).join(', ') + '?', 'err');
+    } else {
+      appendLine('Not a command yet — try /tdd, or /help to see everything.', 'err');
+    }
+  }
+
+  function updateSuggestions() {
+    const val = input.value.replace(/^\//, '').toLowerCase();
+    suggestBox.innerHTML = '';
+    activeSuggestIdx = -1;
+    if (!val) { suggestBox.classList.remove('show'); return; }
+    const matches = Object.keys(skillsByCmd).filter((c) => c.startsWith(val)).slice(0, 6);
+    if (!matches.length) { suggestBox.classList.remove('show'); return; }
+    matches.forEach((m) => {
+      const item = document.createElement('div');
+      item.className = 'term-suggest-item';
+      item.textContent = '/' + m;
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        input.value = '/' + m;
+        suggestBox.classList.remove('show');
+        input.focus();
+      });
+      suggestBox.appendChild(item);
+    });
+    suggestBox.classList.add('show');
+  }
+
+  input.addEventListener('input', updateSuggestions);
+
+  input.addEventListener('keydown', (e) => {
+    const items = suggestBox.querySelectorAll('.term-suggest-item');
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeSuggestIdx >= 0 && items[activeSuggestIdx]) {
+        input.value = items[activeSuggestIdx].textContent;
+      }
+      runCommand(input.value);
+      input.value = '';
+      suggestBox.classList.remove('show');
+    } else if (e.key === 'Tab') {
+      if (items.length) {
+        e.preventDefault();
+        input.value = items[0].textContent;
+        suggestBox.classList.remove('show');
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (items.length) {
+        activeSuggestIdx = Math.min(activeSuggestIdx + 1, items.length - 1);
+        items.forEach((it, i) => it.classList.toggle('active', i === activeSuggestIdx));
+      } else if (history.length) {
+        historyIdx = Math.min(historyIdx + 1, history.length);
+        input.value = history[historyIdx] || '';
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (items.length) {
+        activeSuggestIdx = Math.max(activeSuggestIdx - 1, 0);
+        items.forEach((it, i) => it.classList.toggle('active', i === activeSuggestIdx));
+      } else if (history.length) {
+        historyIdx = Math.max(historyIdx - 1, 0);
+        input.value = history[historyIdx] || '';
+      }
+    } else if (e.key === 'Escape') {
+      suggestBox.classList.remove('show');
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.term-input-row')) suggestBox.classList.remove('show');
+  });
+
+  document.querySelectorAll('.chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      runCommand('/' + chip.dataset.cmd);
+      input.focus();
+    });
+  });
+
+  appendLine('Type a command and press Enter — try /tdd or /security-audit. Reply again and the agent will point you to the real thing.', 'resp hint');
+
+  // ── Plugin skill modal ─────────────────────────────────
+  const modal = document.getElementById('skill-modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalSub = document.getElementById('modal-sub');
+  const modalBody = document.getElementById('modal-body');
+
+  function openPluginModal(pluginName) {
+    const skills = skillsData.filter((s) => s.plugin === pluginName);
+    modalTitle.textContent = pluginName;
+    modalSub.textContent = skills.length + ' skills';
+    modalBody.innerHTML = '';
+    skills.forEach((s) => {
+      const div = document.createElement('div');
+      div.className = 'modal-skill';
+      const code = document.createElement('code');
+      code.textContent = '/' + s.cmd;
+      const p = document.createElement('p');
+      p.textContent = s.desc;
+      div.appendChild(code);
+      div.appendChild(p);
+      modalBody.appendChild(div);
+    });
+    modal.classList.add('show');
+  }
+
+  document.querySelectorAll('.plugin-card').forEach((card) => {
+    card.addEventListener('click', () => openPluginModal(card.dataset.plugin));
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openPluginModal(card.dataset.plugin);
+      }
+    });
+  });
+
+  document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('show'));
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('show'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') modal.classList.remove('show'); });
+</script>
+
+</body>
+</html>

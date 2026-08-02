@@ -26,6 +26,7 @@ dist/
 build/
 .next/
 out/
+.astro/
 
 # Environment & secrets
 .env
@@ -50,7 +51,6 @@ npm-debug.log*
 # Maintainer-only: build/release artifacts and source packages
 vscode-extension/
 cli/
-website/
 
 # Other Stuff
 .dev/
