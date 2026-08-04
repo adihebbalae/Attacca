@@ -19,7 +19,7 @@ Install only what you need — each plugin works standalone.
 
 | Plugin | What it adds |
 |---|---|
-| **attacca-core** | Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, more), `critic` + `researcher` subagents, token-saving read-once hook, auto-lint hook |
+| **attacca-core** | Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, more), `critic` + `researcher` subagents, token-saving read-once hook, auto-lint hook, context-budget advisory hook |
 | **attacca-security** | Security-audit / supply-chain / SBOM skills, an isolated-context `security-auditor` subagent, and a hook that **blocks `git push` until a fresh clean audit exists** |
 | **attacca-init** | `/interrogate` — turns "build me a webstore with stripe and auth" into structured questions (auth, payments, data, hosting, budget, non-goals) and a committed `CONTEXT.md` spec — plus init-project, retrofit, mvp |
 
@@ -31,7 +31,7 @@ mkdir my-app && cd my-app && git init && claude
 
 Then: install the plugins, describe what you want to build, and `/interrogate` fires on anything ambiguous. Answers become `CONTEXT.md` — the committed file every future session (and teammate, and cloud agent) reads to orient. End sessions with `/wrap-session` to keep it current.
 
-For the minimal per-project files (CLAUDE.md, AGENTS.md, CONTEXT.md skeleton, settings.json), copy [`template/`](template/) — four small files, that's the whole footprint. Existing codebase? Run `/retrofit`.
+For the minimal per-project files (CLAUDE.md, AGENTS.md, CONTEXT.md skeleton, settings.json, statusline.mjs), copy [`template/`](template/) — five small files, that's the whole footprint. `settings.json` wires the statusLine to `statusline.mjs`, which feeds attacca-core's context-watch hook so the model can see its own context/rate-limit budget and flag it instead of quietly rotting or reflex-compacting. Existing codebase? Run `/retrofit`.
 
 ## Using another tool?
 
@@ -46,7 +46,7 @@ For the minimal per-project files (CLAUDE.md, AGENTS.md, CONTEXT.md skeleton, se
 
 ## Version
 
-`v4.0.0` — see [CHANGELOG.md](CHANGELOG.md). v3.11.2 (the multi-tool boilerplate era) is preserved at tag `v3.11.2-final`.
+`v4.2.0` — see [CHANGELOG.md](CHANGELOG.md). v3.11.2 (the multi-tool boilerplate era) is preserved at tag `v3.11.2-final`.
 
 ---
 

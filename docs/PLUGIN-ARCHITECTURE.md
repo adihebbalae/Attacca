@@ -17,7 +17,7 @@ Attacca ships as three Claude Code plugins from one marketplace (`/plugin market
 ## attacca-core — workflow skills + hooks
 - **Skills**: diagnose, tdd, code-review, quality-gate, karpathy-guidelines, prototype, grill-me, grill-with-docs, improve-codebase-architecture, llm-wiki, incident-response, to-issues, to-prd, caveman, zoom-out, wrap-session, bdr-commit.
 - **Subagents**: `critic` (fresh-context quality review — over-engineering, slop, claims-vs-diff), `researcher` (isolated-context web research). Both `model: sonnet` — they read and judge; they don't need top-tier reasoning.
-- **Hooks**: `read-once.mjs` (PreToolUse Read — blocks re-reading unchanged files, large token savings), auto-lint (PostToolUse Write/Edit).
+- **Hooks**: `read-once.mjs` (PreToolUse Read — blocks re-reading unchanged files, large token savings), auto-lint (PostToolUse Write/Edit), `context-watch.mjs` (UserPromptSubmit — reads the usage snapshot teed by `template/statusline.mjs` and advises the model when context or rate-limit usage crosses a threshold; never runs `/clear`/`/compact` itself).
 
 ## attacca-security — the gate
 - **Skills**: security-audit (OWASP sweep), supply-chain (package gates, typosquatting), sbom.

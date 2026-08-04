@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.2.0] - 2026-08-04
+
+### Added
+- **Context-budget awareness** — `template/statusline.mjs` (statusLine command showing ctx %, 5h/7d rate-limit usage, teed to a per-session snapshot) paired with `attacca-core`'s new `context-watch.mjs` hook (`UserPromptSubmit`), which reads that snapshot and advises the model — via injected context, on an escalating cadence — when context or rate-limit usage crosses a threshold. Percentage-based so it's meaningful on both 200k and 1M context windows. Never runs `/clear`/`/compact` itself, only flags. `template/` is now five files instead of four.
+
 ## [4.1.0] - 2026-08-01
 
 ### Added
