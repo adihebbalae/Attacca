@@ -191,14 +191,7 @@ When a project enables auto-land via `.attacca/security-classifier.config.json` 
 
 1. Per-PR Security audit produces a SIMPLE classification
 2. Verify the classification
-3. If SIMPLE and auto-land enabled: run `git merge --no-ff <branch> -m "merge: ..."` and note it in CONTEXT.md
+3. If SIMPLE and auto-land enabled: run `git merge --no-ff <branch> -m "merge: ..."` — the merge commit is the record, don't duplicate it into project memory
 4. If COMPLEX or auto-land disabled: route to human review
 
 Push always remains explicit and human-gated regardless of auto-land — local merges only.
-
-## Future Enhancements (not implemented)
-
-- **ML-based heuristics** — Train a simple classifier on historical PRs to improve the criteria
-- **Per-project customization** — Allow projects to whitelist certain sensitive paths if they have special handling
-- **Cross-PR dependency detection** — Detect when a SIMPLE PR depends on another PR not yet merged
-- **Merge coordinator** — Schedule optimal landing order when multiple SIMPLE PRs are in flight 

@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.3.0] - 2026-08-14
+
+Adopts the reference/working context split from Van Clief & McDermott's *Interpretable Context Methodology* (arXiv:2603.16021). Rationale, and what was deliberately **not** adopted, in `docs/DESIGN-DECISIONS.md`.
+
+### BREAKING
+- **`CONTEXT.md` split into two files.** `CONTEXT.md` keeps Project / Stack / Key Decisions (stable, append-only). `Current Focus` / `Next Steps` / `Blockers` move to a new committed **`.attacca/focus.md`** (per-session, rewritten wholesale). They had opposite lifecycles sharing one ~100-line budget, so the append-only decision trail — the part git history can't reconstruct — kept losing space to a task list that goes stale in a week. Migration is mechanical and documented in `docs/CONTEXT-SCHEMA.md`; `/retrofit` and `/wrap-session` both perform it automatically on a pre-4.3 project. Nothing breaks if you skip it — skills fall back to `CONTEXT.md` when `focus.md` is absent.
+- **`.gitignore` guidance changed**: ignore `.attacca/audits/` and `.attacca/sbom/`, **never bare `.attacca/`** — that would drop the committed `focus.md`. `/retrofit` narrows an existing bare ignore and says so.
+- **`grill-with-docs` glossary moved to `docs/GLOSSARY.md`** (multi-context map: `docs/GLOSSARY-MAP.md`; `CONTEXT-FORMAT.md` → `GLOSSARY-FORMAT.md`). It previously wrote a domain glossary to `CONTEXT.md` while `docs/CONTEXT-SCHEMA.md` defined the same filename as project orientation — two authoritative schemas for one name. `improve-codebase-architecture` follows the rename. The skill offers the move rather than performing it silently.
+- **`validate-idea` writes to `.attacca/validation/<slug>/`** instead of a root `validation/` directory, so every generated artifact lives under one convention. Gate 0 detects and offers to move a legacy run.
+
+### Added
+- **Score and performance** — the two files get Attacca's own vocabulary instead of ICM's numbered layers. `CONTEXT.md` is *the score* (authoritative, amended deliberately); `.attacca/focus.md` is *a performance* (one session's rendering, disposable). It's named because it generates the rules rather than labelling them: a performance never edits the score; you can lose a performance but not the score; when performances keep going wrong the same way, fix the score. Filenames are unchanged — the vocabulary is for explaining, not for renaming.
+- **`/wrap-session` step 4: amend the score** — surfaces corrections you received *twice or more* in a session and proposes the fix at the right level (`AGENTS.md` for conventions, `CONTEXT.md` for settled facts, a hook for anything that should block rather than remind). Two is the threshold; a single correction is a preference. This is ICM's §6.3 "edit the source, not the output" principle, which the paper describes as desirable and unimplemented — cheap here because recurring corrections are visible in the transcript and need no new state.
+- **Inputs tables** on skills that load reference material (`wrap-session`, `grill-with-docs`, `improve-codebase-architecture`, `validate-idea`) — declaring which file, which sections, and why, instead of prose "read X" scattered through the steps. `validate-idea`'s is per-gate: its eight reference files total ~390 lines, and loading them all at Gate 0 puts instructions for gates you haven't reached in competition with the judgement you're making now.
+- **Four context-architecture checks in `scripts/validate-plugins.mjs`** — dangling relative doc links (code fences excluded), a 200-line budget on reference files, generated artifacts confined to `.attacca/`, and one-schema-per-filename for `CONTEXT.md` / `focus.md`. Prose discipline decays; a validator doesn't. The one-schema check is what surfaced the `CONTEXT.md` collision above.
+- **`template/focus.md`** — the `.attacca/focus.md` skeleton. `template/` is now six files.
+
+### Removed
+- `security-classifier.md`'s "Future Enhancements (not implemented)" section — speculative, unimplemented, and the reason the file exceeded the new 200-line reference budget.
+
 ## [4.2.0] - 2026-08-04
 
 ### Added

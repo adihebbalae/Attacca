@@ -2,7 +2,10 @@
 // validate-plugins.mjs — consistency checks for the Attacca marketplace.
 // Exit 0 = all good; exit 1 = findings (printed to stderr).
 // Checks: manifests parse, versions agree everywhere, marketplace sources exist,
-// hooks files parse, no dead v3 references or dated model names in shipped content.
+// hooks files parse, no dead v3 references or dated model names in shipped content,
+// plus the context-architecture guardrails (4.3): no dangling relative doc links,
+// reference files stay under budget, generated artifacts stay under .attacca/,
+// and no filename carries two competing schemas.
 
 import { readFileSync, readdirSync, existsSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -65,8 +68,76 @@ for (const file of [...walk("plugins"), ...walk("template")]) {
   if (datedModel.test(text)) errors.push(`${file}: contains dated model name (${text.match(datedModel)[0]}) — use tiers`);
 }
 
+// 3. Context-architecture guardrails.
+// Rationale in docs/DESIGN-DECISIONS.md ("What we took from ICM"). These encode as
+// checks what would otherwise be prose discipline, which decays.
+
+const shipped = [...walk("plugins"), ...walk("template")].filter(f => /\.(md|json|mjs)$/.test(f));
+const readShipped = (f) => readFileSync(join(root, f), "utf8");
+
+// 3a. No dangling relative markdown links. A skill pointing at a reference file that
+// isn't there is a silent context gap: the model reads the pointer and moves on.
+const LINK = /\[[^\]]*\]\((\.{1,2}\/[^)\s#]+|[A-Za-z0-9][^):\s#]*\.(?:md|mjs|json))(?:#[^)]*)?\)/g;
+// Fenced blocks hold illustrative paths for the *user's* repo, not links into ours.
+const stripFences = (t) => t.replace(/^```[\s\S]*?^```/gm, "");
+for (const file of shipped.filter(f => f.endsWith(".md"))) {
+  const dir = dirname(file);
+  for (const [, target] of stripFences(readShipped(file)).matchAll(LINK)) {
+    if (/^[a-z]+:/i.test(target)) continue;             // absolute URL
+    const resolved = join(root, dir, target).replace(/\\/g, "/");
+    if (!existsSync(resolved)) errors.push(`${file}: dangling link -> ${target}`);
+  }
+}
+
+// 3b. Reference-material budget. ICM caps reference files at 200 lines; past that a
+// stage loads more than it can use. SKILL.md files are exempt (they are contracts,
+// not reference), but flagged over 200 so growth is at least visible.
+const LINE_BUDGET = 200;
+for (const file of shipped.filter(f => f.endsWith(".md") && !/(^|\/)SKILL\.md$/.test(f))) {
+  const lines = readShipped(file).split(/\r?\n/).length;
+  if (lines > LINE_BUDGET) errors.push(`${file}: ${lines} lines > ${LINE_BUDGET} — split it`);
+}
+
+// 3c. Generated artifacts live under .attacca/ — one convention, not one per skill.
+// Also: never gitignore .attacca/ wholesale, which would drop the committed focus.md.
+const strayArtifact = /(?<![.\w/`])(?:validation|audits|sbom)\/(?![*\w-]*\.(?:mjs|json)\b)/;
+for (const file of shipped.filter(f => f.endsWith(".md"))) {
+  const text = readShipped(file);
+  for (const line of text.split(/\r?\n/)) {
+    if (/\.attacca\//.test(line)) continue;
+    if (strayArtifact.test(line) && !/legacy|pre-4\.3|GLOSSARY/i.test(line)) {
+      errors.push(`${file}: artifact path outside .attacca/ — "${line.trim().slice(0, 70)}"`);
+    }
+  }
+  if (/^\s*[`"']?\.attacca\/?[`"']?\s*$/m.test(text) && /gitignore/i.test(text)) {
+    errors.push(`${file}: gitignores .attacca/ wholesale — would drop the committed focus.md`);
+  }
+}
+
+// 3d. One filename, one schema. Two files each claiming to define the canonical
+// layout of the same document is the failure this check exists to prevent — it is
+// how CONTEXT.md ended up meaning both "project orientation" and "domain glossary".
+const SECTION_OWNERS = {
+  "CONTEXT.md": ["## Project", "## Stack", "## Key Decisions"],
+  "focus.md": ["## Current Focus", "## Next Steps", "## Blockers"],
+};
+for (const [owner, sections] of Object.entries(SECTION_OWNERS)) {
+  const other = owner === "CONTEXT.md" ? "focus.md" : "CONTEXT.md";
+  const otherSections = SECTION_OWNERS[other];
+  const templateFile = `template/${owner}`;
+  check(existsSync(join(root, templateFile)), `template: missing ${owner}`);
+  if (!existsSync(join(root, templateFile))) continue;
+  const text = readShipped(templateFile);
+  for (const s of sections) {
+    if (!text.includes(s)) errors.push(`${templateFile}: missing required section "${s}"`);
+  }
+  for (const s of otherSections) {
+    if (text.includes(s)) errors.push(`${templateFile}: owns "${s}", which belongs to ${other}`);
+  }
+}
+
 if (errors.length) {
   console.error(`validate-plugins: ${errors.length} finding(s)\n` + errors.map(e => `  ✗ ${e}`).join("\n"));
   process.exit(1);
 }
-console.log(`validate-plugins: OK — ${pluginDirs.length} plugins, version ${version}`);
+console.log(`validate-plugins: OK — ${pluginDirs.length} plugins, version ${version}, ${shipped.length} shipped files`);

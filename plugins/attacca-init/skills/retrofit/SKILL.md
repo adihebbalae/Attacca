@@ -60,9 +60,11 @@ Document what works and what fails.
 
 ---
 
-## Phase 2: Generate CONTEXT.md from Audit
+## Phase 2: Generate CONTEXT.md + .attacca/focus.md from Audit
 
-Create or update CONTEXT.md at project root with findings:
+Two files, split by rate of change (see `docs/CONTEXT-SCHEMA.md`). What you inferred about the codebase is stable; what you inferred from recent branches is not.
+
+`CONTEXT.md` at project root:
 
 ```markdown
 # [Project Name]
@@ -79,7 +81,15 @@ Create or update CONTEXT.md at project root with findings:
 
 ## Key Decisions
 
-[Document any architectural patterns you observed]
+[Architectural patterns you observed. Mark each as OBSERVED, not decided —
+ you're inferring intent from code and may be wrong. The team can confirm or
+ correct; either way the bullet stays as the record.]
+```
+
+`.attacca/focus.md`:
+
+```markdown
+# Focus
 
 ## Current Focus
 
@@ -91,10 +101,12 @@ Create or update CONTEXT.md at project root with findings:
 
 ## Blockers
 
-[If any. Remove when resolved.]
+[If any. "None" if clear.]
 ```
 
-**If CONTEXT.md already exists**: merge new findings, never overwrite. Ask user if any detected facts should update it.
+**If CONTEXT.md already exists**: merge new findings, never overwrite. Ask the user if any detected facts should update it.
+
+**If it exists in the pre-4.3 single-file layout** (has `Current Focus` / `Next Steps` / `Blockers`): migrate it — move those three sections into `.attacca/focus.md`, drop them from `CONTEXT.md`, leave Project / Stack / Key Decisions untouched. Say that you did it. This is the one case where retrofit edits an existing `CONTEXT.md` structurally, and it is lossless.
 
 ---
 
@@ -103,7 +115,7 @@ Create or update CONTEXT.md at project root with findings:
 **Gitignore**:
 - Read existing `.gitignore`
 - Merge: combine both, no duplicates
-- Never delete existing entries
+- Never delete existing entries — with one exception: a bare `.attacca/` line must become `.attacca/audits/` + `.attacca/sbom/`, or the committed `focus.md` silently never reaches the remote. Narrowing an ignore is not deleting an entry; say you did it.
 
 **Project config** (CLAUDE.md, etc.):
 - If existing `CLAUDE.md` exists, show diff and ask before changing
@@ -176,7 +188,7 @@ When user confirms:
 3. **Update CLAUDE.md** with project conventions found in audit
 4. **Git commit**:
    ```bash
-   git add CONTEXT.md .gitignore CLAUDE.md
+   git add CONTEXT.md .attacca/focus.md .gitignore CLAUDE.md
    git commit -m "chore: retrofit Attacca documentation and settings
 
    - Added CONTEXT.md with project overview

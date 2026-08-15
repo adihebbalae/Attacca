@@ -22,10 +22,10 @@ Read `references/honesty.md` before Gate 0. It is the non-negotiable output cont
 
 ## State
 
-All work lives in `./validation/<idea-slug>/` relative to the user's project directory:
+All work lives in `.attacca/validation/<idea-slug>/` relative to the user's project directory — the same place every other Attacca skill writes its generated artifacts:
 
 ```
-validation/<idea-slug>/
+.attacca/validation/<idea-slug>/
   PREREG.md      pre-registered kill criteria — WRITE ONCE, NEVER EDIT
   LEDGER.md      append-only evidence table
   PROGRESS.md    gate checklist + session notes
@@ -33,9 +33,27 @@ validation/<idea-slug>/
   DECISION.md    the memo
 ```
 
-**Gate 0 — Resume check.** Before anything, check whether `validation/*/PROGRESS.md` exists. If so, read it, tell the user which gates are complete, and resume at the first incomplete gate. Never re-run a completed gate; never rewrite `PREREG.md`.
+**Gate 0 — Resume check.** Before anything, check whether `.attacca/validation/*/PROGRESS.md` exists (also check a legacy `validation/` at the repo root — pre-4.3 runs lived there; offer to move it). If so, read it, tell the user which gates are complete, and resume at the first incomplete gate. Never re-run a completed gate; never rewrite `PREREG.md`.
 
 Templates are in `templates/`. Copy them, don't invent new formats.
+
+## Inputs
+
+Load per gate, not up front. Every row is a whole small file except where scoped.
+
+| Gate | Layer | File | Scope |
+|---|---|---|---|
+| all | Reference | `references/honesty.md` | Full — the output contract |
+| 0 | Reference | `references/assumptions.md` | Taxonomy + phrasing rules |
+| 1 | Reference | `references/prereg.md` | Threshold-setting + worked examples |
+| 2 | Reference | `references/cheap-kills.md` | The disqualifier ladder, in order |
+| 3 | Reference | `references/evidence.md` | Source hierarchy + basis tags |
+| 4 | Reference | `references/redteam.md` | Subagent brief (passed to the subagent, not read into your own context) |
+| 5 | Reference | `references/verdict.md` | Verdict rules table |
+| interview | Reference | `references/interviews.md` | Full — replaces gates 2–5 |
+| 0–5 | Working | `.attacca/validation/<slug>/*` | The run's own artifacts |
+
+`interviews.md` is only ever loaded in `interview` mode. Loading all eight reference files at Gate 0 puts ~390 lines of instructions for gates you haven't reached into the window that Gate 0's judgement has to compete with.
 
 ---
 

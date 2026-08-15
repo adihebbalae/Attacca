@@ -7,7 +7,7 @@ v4 is a breaking redesign: the clone-a-boilerplate model and the Manager/Enginee
 | v3 | v4 |
 |---|---|
 | Clone template, cherry-pick files | `/plugin marketplace add adihebbalae/Attacca` + `/plugin install` |
-| `.agents/state.json`, `state.md` | `CONTEXT.md` (committed, human-readable) |
+| `.agents/state.json`, `state.md` | `CONTEXT.md` + `.attacca/focus.md` (committed, human-readable) |
 | `.agents/workspace-map.md` | deleted — native search + memory |
 | `.agents/handoff.md`, handoff prompts | deleted — native subagents / agent teams |
 | Manager / Engineer / Designer / Medic / Consultant personas | deleted — main loop + plan mode |
@@ -21,7 +21,7 @@ v4 is a breaking redesign: the clone-a-boilerplate model and the Manager/Enginee
 ## Steps for an existing v3 project
 
 1. Install the plugins (marketplace add + install attacca-core, attacca-security, attacca-init).
-2. Create `CONTEXT.md` from your v3 state: `## Project` from the PRD, `## Key Decisions` from `state.json` history / BDR commits, `## Current Focus`/`## Next Steps` from `state.md`. Or ask Claude: "read .agents/state.json and .agents/state.md and generate CONTEXT.md per the attacca schema".
+2. Create the two project-memory files from your v3 state — `CONTEXT.md` gets `## Project` from the PRD and `## Key Decisions` from `state.json` history / BDR commits; `.attacca/focus.md` gets `## Current Focus` / `## Next Steps` from `state.md`. Or ask Claude: "read .agents/state.json and .agents/state.md and generate CONTEXT.md and .attacca/focus.md per the attacca schema". See `CONTEXT-SCHEMA.md` for which section goes where.
 3. Delete `.agents/` (after step 2), `.github/agents/`, `.github/prompts/`, `.cursor/`, `.clinerules/`, `.windsurfrules`, `.gemini/`, `GEMINI.md`, `ANTIGRAVITY.md`, and per-tool skill copies.
 4. Replace your project `CLAUDE.md` with the v4 template (`template/CLAUDE.md`), keep an `AGENTS.md` (template provided), port any project-specific rules into it.
 5. Commit. Run `/security-audit` once so the push gate has a report.

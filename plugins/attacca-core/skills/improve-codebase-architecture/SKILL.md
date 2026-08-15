@@ -1,6 +1,6 @@
 ---
 name: improve-codebase-architecture
-description: Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
+description: Find deepening opportunities in a codebase, informed by the domain language in docs/GLOSSARY.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable.
 ---
 
 <!-- Delete when: native Claude Code architecture visualization with AI-guided refactoring suggestions is available -->
@@ -30,11 +30,23 @@ Key principles (see [LANGUAGE.md](LANGUAGE.md) for the full list):
 
 This skill is _informed_ by the project's domain model. The domain language gives names to good seams; ADRs record decisions the skill should not re-litigate.
 
+## Inputs
+
+| Layer | File | Scope | Why |
+|---|---|---|---|
+| Reference | `docs/GLOSSARY.md` (or `docs/GLOSSARY-MAP.md`) | Language + Relationships | Names the seams; keeps proposed module names in the project's vocabulary |
+| Reference | `docs/adr/*.md` | Only ADRs covering the area you're touching | Decisions not to re-litigate |
+| Reference | `CONTEXT.md` | "Key Decisions" only | Project constraints that rule candidates in or out |
+| Reference | [LANGUAGE.md](LANGUAGE.md) | Full file | Architecture vocabulary (deep/shallow, locality, leverage) |
+| Working | The codebase | Modules under discussion | What's being restructured |
+
+Do not load `DEEPENING.md` or `INTERFACE-DESIGN.md` up front — they're needed only inside the grilling loop, at step 3.
+
 ## Process
 
 ### 1. Explore
 
-Read the project's domain glossary (`CONTEXT.md` or `CONTEXT-MAP.md`) and any ADRs in the area you're touching first.
+Read the project's domain glossary (`docs/GLOSSARY.md`, or `docs/GLOSSARY-MAP.md` in a multi-context repo) and any ADRs in the area you're touching first.
 
 Then walk the codebase. Don't follow rigid heuristics — explore organically and note where you experience friction:
 
@@ -55,7 +67,7 @@ Present a numbered list of deepening opportunities. For each candidate:
 - **Solution** — plain English description of what would change
 - **Benefits** — explained in terms of locality and leverage, and also in how tests would improve
 
-**Use CONTEXT.md vocabulary for the domain, and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** If `CONTEXT.md` defines "Order," talk about "the Order intake module" — not "the FooBarHandler," and not "the Order service."
+**Use glossary vocabulary for the domain, and [LANGUAGE.md](LANGUAGE.md) vocabulary for the architecture.** If `docs/GLOSSARY.md` defines "Order," talk about "the Order intake module" — not "the FooBarHandler," and not "the Order service."
 
 **ADR conflicts**: if a candidate contradicts an existing ADR, only surface it when the friction is real enough to warrant revisiting the ADR. Mark it clearly (e.g. _"contradicts ADR-0007 — but worth reopening because…"_). Don't list every theoretical refactor an ADR forbids.
 
@@ -67,8 +79,8 @@ Once the user picks a candidate, drop into a grilling conversation. Walk the des
 
 Side effects happen inline as decisions crystallize:
 
-- **Naming a deepened module after a concept not in `CONTEXT.md`?** Add the term to `CONTEXT.md` — same discipline as `grill-with-docs` (see [`../grill-with-docs/CONTEXT-FORMAT.md`](../grill-with-docs/CONTEXT-FORMAT.md)). Create the file lazily if it doesn't exist.
-- **Sharpening a fuzzy term during the conversation?** Update `CONTEXT.md` right there.
+- **Naming a deepened module after a concept not in the glossary?** Add the term to `docs/GLOSSARY.md` — same discipline as `grill-with-docs` (see [`../grill-with-docs/GLOSSARY-FORMAT.md`](../grill-with-docs/GLOSSARY-FORMAT.md)). Create the file lazily if it doesn't exist.
+- **Sharpening a fuzzy term during the conversation?** Update `docs/GLOSSARY.md` right there.
 - **User rejects the candidate with a load-bearing reason?** Offer an ADR, framed as: _"Want me to record this as an ADR so future architecture reviews don't re-suggest it?"_ Only offer when the reason would actually be needed by a future explorer to avoid re-suggesting the same thing — skip ephemeral reasons ("not worth it right now") and self-evident ones. See [`../grill-with-docs/ADR-FORMAT.md`](../grill-with-docs/ADR-FORMAT.md).
 - **Want to explore alternative interfaces for the deepened module?** See [INTERFACE-DESIGN.md](INTERFACE-DESIGN.md). For dependency-strategy guidance (in-process / local-substitutable / remote-owned / true-external), see [DEEPENING.md](DEEPENING.md).
 

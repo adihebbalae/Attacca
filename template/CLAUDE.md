@@ -3,8 +3,9 @@
 @AGENTS.md
 
 ## Session protocol
-- **Start**: read `CONTEXT.md` — it holds the spec, key decisions, and current focus. If it's missing or empty and the task is non-trivial, run `/interrogate` before building anything.
-- **End**: run `/wrap-session` to update `CONTEXT.md` (current focus, next steps, new decisions). Keep it under ~100 lines.
+- **Start**: read `CONTEXT.md` (what this is, the stack, decisions and their rejected alternatives), then `.attacca/focus.md` (what's in flight, what's next, what's blocked). If `CONTEXT.md` is missing or empty and the task is non-trivial, run `/interrogate` before building anything.
+- **End**: run `/wrap-session` — it rewrites `.attacca/focus.md` and appends any new decision to `CONTEXT.md`.
+- `CONTEXT.md` is the score (append-only decisions, ~100 lines); `.attacca/focus.md` is this performance (~30 lines, disposable). A performance never edits the score — see `AGENTS.md`. Don't put session churn in `CONTEXT.md`, and don't put durable decisions in `focus.md`.
 
 ## Verification
 - Never `git push` without a fresh clean security audit — the audit-gate hook enforces this; `/security-audit` produces the report.

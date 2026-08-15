@@ -23,6 +23,8 @@ Check what exists:
 
 **1A — CONTEXT.md already in repo root**: Read it. If it's complete (has Project, Stack, Key Decisions sections), skip to step 3.
 
+Read `.attacca/focus.md` too if it exists — it tells you what's already underway, which changes what's worth scaffolding.
+
 **1B — No CONTEXT.md**: Ask interactively:
 ```
 1. What is the project name and one-sentence purpose?
@@ -40,6 +42,8 @@ Create basic project structure:
 ```
 project-root/
 ├── .gitignore
+├── .attacca/
+│   └── focus.md                 [committed session state]
 ├── .claude/
 │   └── skills/                  [or wherever installed]
 ├── docs/
@@ -49,11 +53,13 @@ project-root/
 └── CONTEXT.md
 ```
 
-**.gitignore**: create one appropriate to the stack (always ignore `.env*`, dependency dirs, build output; `.attacca/` unless the team wants committed audit trails).
+**.gitignore**: create one appropriate to the stack (always ignore `.env*`, dependency dirs, build output). For Attacca artifacts, ignore `.attacca/audits/` and `.attacca/sbom/` — **never bare `.attacca/`**, which would swallow the committed `focus.md`. Teams that want committed audit trails drop those two lines.
 
-### 3. Create or Complete CONTEXT.md
+### 3. Create or Complete CONTEXT.md + .attacca/focus.md
 
-If CONTEXT.md doesn't exist, create it at project root with:
+Two files, split by rate of change (see `docs/CONTEXT-SCHEMA.md`). If they don't exist, create them:
+
+`CONTEXT.md` at project root — stable, append-only, ~100 lines:
 
 ```markdown
 # [Project Name]
@@ -69,22 +75,28 @@ If CONTEXT.md doesn't exist, create it at project root with:
 
 ## Key Decisions
 
-[Document any non-obvious choices here. Add more as decisions are made.]
+[Non-obvious choices, each with the alternative it beat. Append as decisions are made; never delete.]
+```
+
+`.attacca/focus.md` — disposable, rewritten each session, ~30 lines:
+
+```markdown
+# Focus
 
 ## Current Focus
 
-[What you're building right now. Update as you work.]
+[What you're building right now.]
 
 ## Next Steps
 
-[Unblocking or upcoming work. Update as you go.]
+[Unblocking or upcoming work.]
 
 ## Blockers
 
-[If any. Remove when resolved.]
+[If any. "None" if clear.]
 ```
 
-If CONTEXT.md exists but is incomplete, fill in missing sections.
+If either exists but is incomplete, fill in missing sections. If `CONTEXT.md` exists with `Current Focus` / `Next Steps` / `Blockers` sections (pre-4.3 layout), move them into `.attacca/focus.md` and drop them from `CONTEXT.md`.
 
 ### 4. First Commit
 
@@ -97,6 +109,6 @@ git commit -m "feat: initialize project"
 
 ## Notes
 
-- Keep CONTEXT.md lightweight — it's a map, not a spec.
+- Keep CONTEXT.md lightweight — it's a map, not a spec. Session churn belongs in `.attacca/focus.md`.
 - Domain glossary and ADRs live here; use them in all code and commit messages.
 - Refine incrementally as you learn more about the project.

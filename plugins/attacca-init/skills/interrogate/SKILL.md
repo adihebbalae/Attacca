@@ -82,9 +82,11 @@ Walk domains in order. Stop when all domains are either **answered**, **explicit
 
 ---
 
-## Output: CONTEXT.md
+## Output: two files
 
-Once all domains are resolved (or deferred with named defaults), write or update **CONTEXT.md** at repo root:
+Once all domains are resolved (or deferred with named defaults), write **both** files. The split is by rate of change — see `docs/CONTEXT-SCHEMA.md`. What you learned about the product goes in `CONTEXT.md` and will still be true next year; what to build first goes in `.attacca/focus.md` and is stale in a fortnight.
+
+### `CONTEXT.md` (repo root) — stable
 
 ```markdown
 # Project Context
@@ -106,8 +108,18 @@ Once all domains are resolved (or deferred with named defaults), write or update
 **Decision 2**: [What was decided] | Rejected: [alternatives and why not]
 ...
 
+Last updated: [Today's date]
+```
+
+Every deferral from the interrogation becomes a Key Decisions bullet with its named default — a deferral is a decision, and the reason it was deferred is exactly what a future session needs. Under ~100 lines; if the spec is large, link `docs/spec.md` rather than inlining it.
+
+### `.attacca/focus.md` — per-session
+
+```markdown
+# Focus
+
 ## Current Focus
-[The v1 feature set. 3–5 must-haves. Reference the 9 domains above to confirm nothing is missing.]
+[The v1 feature set. 3–5 must-haves. Walk the 9 domains to confirm nothing is missing.]
 
 ## Next Steps
 1. [First action for implementation]
@@ -115,18 +127,18 @@ Once all domains are resolved (or deferred with named defaults), write or update
 3. [...]
 
 ## Blockers
-[Anything unclear or waiting for external input? Leave empty if none.]
+[Anything unclear or waiting for external input? "None" if clear.]
 
-Last updated: [Today's date] by [user name or session identifier]
+Last updated: [Today's date]
 ```
 
-Keep CONTEXT.md under ~100 lines. It's a reference, not a journal. If the spec is large, link to `docs/spec.md` but don't duplicate it.
+Create the `.attacca/` directory if it doesn't exist. If the project already has a `.gitignore` ignoring `.attacca/` wholesale, narrow it to `.attacca/audits/` and `.attacca/sbom/` — `focus.md` must be committed.
 
 ---
 
 ## Zero-Ambiguity Checklist
 
-Before writing CONTEXT.md, verify:
+Before writing either file, verify:
 - [ ] Problem & Users: Who has it, why, how painful, current workaround
 - [ ] Identity & Auth: Log in? If yes, how? Roles?
 - [ ] Payments: Monetization model and provider (or "free forever")
@@ -161,7 +173,7 @@ No silent assumptions. Everything surfaced.
 
 *[Continue until all 9 domains are answered or deferred]*
 
-**Output**: Write CONTEXT.md with all decisions, then recommend: "Next: run `/plan` to scope the implementation, or start coding if you're confident in this spec."
+**Output**: Write `CONTEXT.md` (project, stack, every decision with its rejected alternative) and `.attacca/focus.md` (the v1 set, ordered next steps, blockers), then recommend: "Next: run `/plan` to scope the implementation, or start coding if you're confident in this spec."
 
 ---
 

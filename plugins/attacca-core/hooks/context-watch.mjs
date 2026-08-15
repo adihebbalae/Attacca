@@ -21,7 +21,7 @@
 //
 // ADVICE PHILOSOPHY: /compact is itself a billed multi-token-window rebuild and
 // does not cure context rot, so the default advice is: finish the scoped task,
-// persist state (memory/CONTEXT.md via /wrap-session), /clear at the boundary.
+// persist state (.attacca/focus.md via /wrap-session), /clear at the boundary.
 // /compact is reserved for genuinely history-dependent long hauls.
 // See: anthropics/claude-code#50998.
 //
@@ -72,7 +72,7 @@ process.stdin.on("end", () => {
     if (fire) {
       const pct = Math.round(s.ctx_pct);
       if (cur === 3) {
-        m.push(`Context ${pct}% used — deep in context-rot territory. Strongly suggest /clear or a fresh session at the first viable stopping point (persist state to memory/CONTEXT.md first); /compact only if this history is truly irreplaceable mid-task.`);
+        m.push(`Context ${pct}% used — deep in context-rot territory. Strongly suggest /clear or a fresh session at the first viable stopping point (run /wrap-session first to persist state to .attacca/focus.md); /compact only if this history is truly irreplaceable mid-task.`);
       } else if (cur === 2) {
         m.push(`Context ${pct}% used — recall degrades from here. Don't reflex-compact: /compact is a billed rebuild that keeps the rot. Prefer finishing the current scoped task, saving state, then /clear at that boundary. Offload heavy reads to subagents either way.`);
       } else {

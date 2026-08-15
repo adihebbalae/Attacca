@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Attacca 4.2 — context-engineering toolkit for Claude Code. Three plugins: attacca-core (workflow skills + hooks), attacca-security (audit gate), attacca-init (project interrogation & scaffolding).",
-    "version": "4.2.0"
+    "version": "4.3.0"
   },
   "plugins": [
     {
       "name": "attacca-core",
       "source": "./plugins/attacca-core",
       "description": "Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, more) + reviewer/researcher subagents + token-saving hooks.",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "author": { "name": "adihebbalae" },
       "homepage": "https://github.com/adihebbalae/Attacca",
       "repository": "https://github.com/adihebbalae/Attacca",
@@ -23,7 +23,7 @@
       "name": "attacca-security",
       "source": "./plugins/attacca-security",
       "description": "Security audit skills (OWASP, supply-chain, SBOM), isolated-context security-auditor subagent, and a push gate that blocks git push without a fresh clean audit.",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "author": { "name": "adihebbalae" },
       "homepage": "https://github.com/adihebbalae/Attacca",
       "repository": "https://github.com/adihebbalae/Attacca",
@@ -34,7 +34,7 @@
       "name": "attacca-init",
       "source": "./plugins/attacca-init",
       "description": "Project intake: /interrogate disambiguates vague build requests into a CONTEXT.md spec; /init-project scaffolds; /retrofit adopts existing repos; validate-idea falsifies the idea before you build any of it. Install alongside attacca-core.",
-      "version": "4.2.0",
+      "version": "4.3.0",
       "author": { "name": "adihebbalae" },
       "homepage": "https://github.com/adihebbalae/Attacca",
       "repository": "https://github.com/adihebbalae/Attacca",
