@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.0] - 2026-08-15
+
+### Added
+- **`attacca-core` / `adversarial-debate` skill** — pressure-tests a built artifact against 2–4 independent skeptical personas, in rounds, until every objection resolves into either a real fix or a named values disagreement. Two facts about the harness carry it, and both are things a model gets wrong by default: a **fork is contaminated** (it watched the work get built and is primed to be sympathetic, so personas must be fresh subagents), and **respawning between rounds destroys the signal** (a blank-slate agent will concede to a persuasive rebuttal it never re-verified, so rounds resume the same agent via `SendMessage`). Ships with a 10-persona catalog in `references/personas.md`, each with a distinct failure mode so they surface different objections rather than restating each other; the skill loads only the entries its panel uses. Heavier than the alternatives by design — `/grill-me` interviews you about a plan, `/code-review` checklists a diff, the `critic` subagent gives one fresh-eyes pass, and this is for something a *specific other person* can reject.
+
 ## [4.3.0] - 2026-08-14
 
 Adopts the reference/working context split from Van Clief & McDermott's *Interpretable Context Methodology* (arXiv:2603.16021). Rationale, and what was deliberately **not** adopted, in `docs/DESIGN-DECISIONS.md`.

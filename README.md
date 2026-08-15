@@ -21,7 +21,7 @@ Install only what you need — each plugin works standalone.
 
 | Plugin | What it adds |
 |---|---|
-| **attacca-core** | Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, wrap-session, bdr-commit, more), `critic` + `researcher` subagents, token-saving read-once hook, auto-lint hook, context-budget advisory hook |
+| **attacca-core** | Workflow skills (diagnose, tdd, code-review, quality-gate, prototype, grill-me, adversarial-debate, wrap-session, bdr-commit, more), `critic` + `researcher` subagents, token-saving read-once hook, auto-lint hook, context-budget advisory hook |
 | **attacca-security** | Security-audit / supply-chain / SBOM skills, an isolated-context `security-auditor` subagent, and a hook that **blocks `git push` until a fresh clean audit exists** |
 | **attacca-init** | `/interrogate` — turns "build me a webstore with stripe and auth" into structured questions (auth, payments, data, hosting, budget, non-goals) and a committed score — plus init-project, retrofit, mvp, validate-idea |
 
@@ -57,7 +57,7 @@ For the minimal per-project files (CLAUDE.md, AGENTS.md, CONTEXT.md + focus.md s
 
 ## Version
 
-`v4.3.0` — see [CHANGELOG.md](CHANGELOG.md). v3.11.2 (the multi-tool boilerplate era) is preserved at tag `v3.11.2-final`.
+`v4.4.0` — see [CHANGELOG.md](CHANGELOG.md). v3.11.2 (the multi-tool boilerplate era) is preserved at tag `v3.11.2-final`.
 
 ---
 

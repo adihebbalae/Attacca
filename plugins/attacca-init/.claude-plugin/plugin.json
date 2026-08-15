@@ -1,7 +1,7 @@
 {
   "name": "attacca-init",
   "description": "Attacca project intake for Claude Code: /interrogate asks the disambiguation questions a vague build request needs (auth, payments, data, hosting, budget, non-goals) and writes the answers into CONTEXT.md; /init-project scaffolds from the spec; /retrofit adopts an existing codebase; /mvp for speed-first builds; validate-idea falsifies a product idea before any of that starts. Pairs with attacca-core.",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "author": { "name": "adihebbalae" },
   "homepage": "https://github.com/adihebbalae/Attacca",
   "repository": "https://github.com/adihebbalae/Attacca",
