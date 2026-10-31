@@ -1,6 +1,8 @@
-# .claudeignore — tells Claude Code CLI which files/dirs to skip
-# Works like .gitignore. Dramatically reduces token usage on every prompt.
-# Reference: reddit.com/r/ClaudeAI workaround B2
+# Legacy ignore-pattern reference; Claude Code does NOT load .claudeignore.
+# The patterns below do not restrict Claude Code Read, Grep, or Glob.
+# Set actual file-read exclusions using permissions.deny with Read rules
+# in .claude/settings.json. Read-deny is best-effort, not an OS sandbox.
+# Official docs: https://code.claude.com/docs/en/permissions#read-and-edit
 
 # Dependencies
 node_modules/
